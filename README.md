@@ -1,6 +1,6 @@
 AEONS Firmware
 
-1. Compiltion Instructions
+1. Compilation Instructions
 -------------------------------------------------------------------------------------------
 1. Download the Arduino IDE v1.0.3.
 

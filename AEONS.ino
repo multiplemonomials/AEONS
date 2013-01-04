@@ -14,7 +14,7 @@
 	M104 - Set extruder target temp
 
 	Custom M-Codes:
-
+	M80  - Turn on Power Supply
 
 	To Be Implemented
 	-------------------
@@ -34,17 +34,6 @@
 	 M114 - Display current position
 
 	Custom M Codes
-	 M80  - Turn on Power Supply
-	 M20  - List SD card
-	 M21  - Init SD card
-	 M22  - Release SD card
-	 M23  - Select SD file (M23 filename.g)
-	 M24  - Start/resume SD print
-	 M25  - Pause SD print
-	 M26  - Set SD position in bytes (M26 S12345)
-	 M27  - Report SD print status
-	 M28  - Start SD digitalWrite (M28 filename.g)
-	 M29  - Stop SD write
 	 M42 - Set output on free pins, on a non pwm pin (over pin 13 on an arduino mega) use S255 to turn it on and S0 to turn it off. Use P to decide the pin (M42 P23 S255) would turn pin 23 on
 	 M81  - Turn off Power Supply
 	 M82  - Set E codes absolute (default)
@@ -72,6 +61,7 @@ THERMISTOR, AD595, MAX6675
 #include "String.h"
 #include "Arduino.h"
 #include "AEONS_Config.h"
+#include <stdlib.h> 
 
 // Fatal error handler.
 #define ASSERT(__value__) 											\
@@ -99,6 +89,15 @@ if (!__value__)														\
 	#define HAS_POWER_SUPPLY
 #endif
 
+// void * operator new(size_t size)
+// {
+  // return malloc(size);
+// }
+
+// void operator delete(void * ptr)
+// {
+  // free(ptr);
+// } 
 //variable area
 
 int current_x_position = 0;
@@ -204,6 +203,8 @@ public:
 	
 };
 
+
+
 /*-----------------------------------------------------------------------------
 	Manages simple I/O device that turns on and off.
 -----------------------------------------------------------------------------*/
@@ -234,43 +235,41 @@ struct Device
 	
 };
 
+	#ifdef HAS_POWER_SUPPLY
+		Device Power_Supply(PS_ON_PIN, true);
+	#endif
+
+	#ifdef HAS_EXTRUDER
+		Heater Extruder(extruder_heater_device, TEMP_0_PIN, HEATER_0_PIN, TEMPTABLE);
+	#endif
+	
+	#ifdef HAS_BED
+		Heater Bed(extruder_heater_device, TEMP_1_PIN, HEATER_1_PIN, BEDTEMPTABLE);
+	#endif
+
+	#ifdef HAS_FAN
+		Device Fan(FAN_PIN, false);
+	#endif
+
+/*
+
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
-struct gcode
+struct code
 {
 	int _n_value;
 	char * command;
 	//checks that the n-code is equal to the last n-code + 1
-	void validate()
-	{
-		if(_n_value != line_number + 1)
-		{
-			Serial.print("ERROR: The supplied line number of ");
-			Serial.println(_n_value);
-			Serial.print(" is not eqaual to ");
-			Serial.print(line_number);
-			Serial.println(" + 1.");
-			return;
-		}
-		
-		else
-		{
-			//update the curent line number
-			line_number = _n_value;
-			return;
-		}
-	}
-	
-	void process();
+	virtual void process() = 0;
 
 };
 
-gcode gcode_factory();
+code * gcode_factory();
 
 /*-----------------------------------------------------------------------------
------------------------------------------------------------------------------*/
+-----------------------------------------------------------------------------
 
-struct G1 :: gcode()
+struct G1 :: code
 {
 	boolean has_x_value;
 	double x_value;
@@ -319,6 +318,7 @@ struct G1 :: gcode()
 			has_f_value = true;
 		}
 	}
+	
 
 };
 
@@ -326,15 +326,15 @@ struct G1 :: gcode()
 /*-----------------------------------------------------------------------------
 M104 (S230) Set extruder temperature to given temp
 -----------------------------------------------------------------------------*/
-struct M104 :: gcode
+struct M104 : code
 {	
-	double s_value;
+	int s_value;
 	
-	gcode_G1(char * command, int n_value)
+	M104(char * command)
 	{
-		if((s_value = get_value_from_char_array(command, 'S') = 0)
+		if((s_value =(int) get_value_from_char_array(command, 'S')) = 0)
 		{
-			Serial.println("No argument provided for M104, setting temp to 0..."
+			Serial.println("No argument provided for M104, setting temp to 0...");
 		}
 		
 	}
@@ -353,19 +353,15 @@ struct M104 :: gcode
 /*-----------------------------------------------------------------------------
 M80 Turn On Power Supply
 -----------------------------------------------------------------------------*/
-struct M80 :: gcode
+struct M80 : code
 {	
-	gcode_G1(char * command, int n_value)
+
+	M80(char * command)
 	{
-		if((s_value = get_value_from_char_array(command, 'S') != 0)
-		{
-			has_s_value = true;
-			s_value = get_value_from_char_array(command, 'S');
-		}
 		
 	}
 	
-	void process()H
+	void process()
 	{
 		#ifdef HAS_POWER_SUPPLY
 			Power_Supply.turn_on();
@@ -375,24 +371,9 @@ struct M80 :: gcode
 };
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
+
 void setup()
 {
-
-	#ifdef HAS_POWER_SUPPLY
-		Device Power_Supply(PS_ON_PIN, true);
-	#endif
-
-	#ifdef HAS_EXTUDER
-		Heater Extruder(extruder_heater_device, TEMP_0_PIN, HEATER_0_PIN, TEMPTABLE);
-	#endif
-	
-	#ifdef HAS_BED
-		Heater Bed(extruder_heater_device, TEMP_1_PIN, HEATER_1_PIN, BEDTEMPTABLE);
-	#endif
-
-	#ifdef HAS_FAN
-		Device Fan(FAN_PIN, false);
-	#endif
     // setup serial connection
 	Serial.begin(BAUDRATE);
 	Serial.println("start");
@@ -403,7 +384,7 @@ void setup()
 		Power_Supply.turn_on();
 	#endif
 	
-	#ifdef HAS_EXTUDER
+	#ifdef HAS_EXTRUDER
 		Extruder.setTemperature(DEFAULT_EXTRUDER_TEMP);
 	#endif
 	
@@ -439,11 +420,12 @@ void loop()
 	manage_temperatures();
 	if(Serial.available())
 	{
-		gcode code_recieved = gcode_factory();
+		code * code_recieved = gcode_factory();
 		if(code_recieved!=NULL)
 		{
-			code_recieved.validate();
-			code_recieved.process();
+		//call the code object's process function and then free it from memory
+			code_recieved->process();
+			delete(code_recieved);
 		}
 	}
 }
@@ -470,9 +452,29 @@ void get_next_command(char * buffer, int buffer_length)
 	buffer[counter-1] = '\0';
 }
 
+void validate(int n_value)
+{
+	if(n_value != line_number + 1)
+	{
+		Serial.print("ERROR: The supplied line number of ");
+		Serial.println(n_value);
+		Serial.print(" is not eqaual to ");
+		Serial.print(line_number);
+		Serial.println(" + 1.");
+		return;
+	}
+	
+	else
+	{
+		//update the curent line number
+		line_number = n_value;
+		return;
+	}
+}
+
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
-gcode gcode_factory()
+code * gcode_factory()
 {
 	char command[MAX_GCODE_LENGTH];
 	
@@ -487,34 +489,36 @@ gcode gcode_factory()
 	
 	//next part sets variables to attributes of the recieved code
 	boolean has_g_value = false;
-	double g_value;
+	int g_value;
 	if(get_value_from_char_array(command, 'G') != 0.0)
 	{
 		has_g_value = true;
-		g_value = get_value_from_char_array(command, 'G');
+		g_value =(int) get_value_from_char_array(command, 'G');
 	}
 	
 	boolean has_m_value;
-	int m_value;
+	int m_value = 0;
 	if(get_value_from_char_array(command, 'M') != 0.0)
 	{
 		has_m_value = true;
-		m_value = get_value_from_char_array(command, 'M');
+		m_value = (int)get_value_from_char_array(command, 'M');
 	}
 	
 	boolean has_n_value;
-	int n_value;
+	int n_value = 0;
 	if(get_value_from_char_array(command, 'M') != 0.0)
 	{
 		has_n_value = true;
-		n_value = get_value_from_char_array(command, 'N');
+		n_value = (int) get_value_from_char_array(command, 'N');
 	}
 	
 	if(!(has_g_value && has_m_value))
 		Serial.println("Error! Neither a g-value or an m-value were recieved!");
 	
-	//Now we construct the correct Gcode object
 	
+	validate(n_value);
+	
+	//Now we construct the correct Gcode object
 	if(has_g_value)
 	{
 		//cast here should be OK since mcodes and gcodes are never decimals
@@ -522,10 +526,8 @@ gcode gcode_factory()
 		{
 			case 0:
 			case 1:
-				
 				break;
 		}
-	return return_code
 	}
 	
 	else if(has_m_value)
@@ -533,21 +535,16 @@ gcode gcode_factory()
 		switch((int) m_value)
 		{
 			case 104:
-				M104 return_code(command, n_value);
-				break;
+				return new M104(command);
 			
 			case 80:
-				M80 return_code(command, n_value);
+				//return new M80(command);
 				break;
 		}
-	return return_code
-	}
-	else
-	{
-		Serial.println("ERROR: Gcode not found");
-		return NULL;
 	}
 	
+	Serial.println("ERROR: Gcode not found");
+	return NULL;
 }
 
 /*-----------------------------------------------------------------------------

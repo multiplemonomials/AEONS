@@ -12,7 +12,7 @@
 // RAMPS 1.3/1.4 = 33
 // Gen6 = 5
 // Gen7 1.2 = 72
-// Gen7 1.3 = 73
+// Gen7 1.3 - 1.4 = 73
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above = 62
 // Teensylu (at90usb) = 8
@@ -56,7 +56,7 @@ const Thermometer bed_heater_device = THERMISTOR;
 
 //// Calibration variables
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-float axis_steps_per_mm[] = {52.504, 26.523, 2267.567, 760.0}; 
+const float axis_steps_per_mm[] = {52.504, 26.523, 2267.567, 760.0}; 
 // Metric Prusa Mendel with Makergear geared stepper extruder:
 //float axis_steps_per_unit[] = {80,80,3200/1.25,1380}; 
 // MakerGear Hybrid Prusa Mendel:

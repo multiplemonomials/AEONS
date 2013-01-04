@@ -4,13 +4,13 @@
 
 *adding many new gcodes
 
+*fixed compilation
+
 PLANNED FEATURES:
 ----------------------------------------------------------------------
 *linear move algorithm
 
 *inactivity timeout
-
-*gen7 v1.4 support (need a pinout diagram... suprisingly hard to get)
 
 
 A	actively
@@ -18,5 +18,7 @@ E	encoporating
 O	objects
 N	not like
 S	Sprinter
+
+
 
 */
