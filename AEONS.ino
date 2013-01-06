@@ -52,53 +52,18 @@
 	 By MultipleMonomials and ChatterComa, thx to Kliment
 -----------------------------------------------------------------------------*/
 
-
-enum Thermometer
-{
-THERMISTOR, AD595, MAX6675
-};
-
+#include "AEONS.h"
 #include "String.h"
 #include "Arduino.h"
-#include "AEONS_Config.h"
 #include <stdlib.h> 
+#include "Printer.h"
+#include "gcodes.h"
+#include "assert.h"
 
-// Fatal error handler.
-#define ASSERT(__value__) 											\
-if (!__value__)														\
-{																	\
-	Serial.print("Fatal Error!\n Check the line in firmware: ");						\
-	Serial.println(__LINE__);										\
-	while(true){}													\
-}
 
-//MACRO AREA
-#if HEATER_0_PIN > -1
-	#define HAS_EXTRUDER
-#endif
-
-#if TEMP_1_PIN > -1
-	#define HAS_BED
-#endif
-
-#if FAN_PIN > -1
-	#define HAS_FAN
-#endif
-
-#if PS_ON_PIN > -1
-	#define HAS_POWER_SUPPLY
-#endif
-
-// void * operator new(size_t size)
-// {
-  // return malloc(size);
-// }
-
-// void operator delete(void * ptr)
-// {
-  // free(ptr);
-// } 
-//variable area
+/*-----------------------------------------------------------------------------
+	Global variables.
+-----------------------------------------------------------------------------*/
 
 int current_x_position = 0;
 int current_y_position = 0;
@@ -109,181 +74,27 @@ int current_f_position = 0;
 //last line number
 long line_number = 0;
 
-typedef int TempInDegrees;
-typedef int RawAdcValue;
-typedef int Pin;
-
-/*-----------------------------------------------------------------------------
-	Implementation of smething that has an active heating device,
-	typically an extruder, heated build plate, etc.
-	
-	Has services for setting, getting, and managing the temperature.
------------------------------------------------------------------------------*/
-class Heater
-{
-	Thermometer  		_device_type;
-	TempInDegrees 		_target;
-	TempInDegrees 		_current;
-	const TempTableElement*   _temptable;
-	Pin                	_sensor_pin; 
-	Pin                	_power_pin;
-
-public:
-	
-	// Ctor.
-	Heater(Thermometer deviceType, Pin sensorPin, Pin powerPin, const TempTableElement* givenTable)
-	{
-		_device_type = deviceType;
-		_target = 0;
-		_current = 0;
-		_temptable = givenTable;
-		_sensor_pin = sensorPin;
-		_power_pin = powerPin;
-		pinMode(_sensor_pin, INPUT);
-		pinMode(_power_pin, OUTPUT);
-	}
-
-	// Return current temperature.
-	TempInDegrees getTemperature()
-	{
-		update_local_temperature();
-		return _current;
-	}
-	
-	void setTemperature(TempInDegrees target)
-	{
-		_target = target;
-		manage_temperature();
-	}
-	
-	// Read thermistor and update class variables.
-	void update_local_temperature()
-	{
-		if (_device_type == THERMISTOR)
-		{
-			RawAdcValue current_raw = 1023 - analogRead(_sensor_pin);
-			for (int i=2; i<=_temptable[0].rawAdcValue; i++)
-			{
-				// Skip until we find a raw value greater than current_raw.
-				if (_temptable[i].rawAdcValue > current_raw)
-				{
-					// Found one.  Interpolate between this and previous table entry.
-					RawAdcValue    fractionalRaw = current_raw - _temptable[i-1].rawAdcValue;
-					TempInDegrees  stepTemp = _temptable[i].tempInDegrees - _temptable[i-1].tempInDegrees;
-					RawAdcValue    stepRaw = _temptable[i].rawAdcValue - _temptable[i-1].rawAdcValue;
-					_current  = _temptable[i-1].tempInDegrees + fractionalRaw * stepTemp / stepRaw;
-
-					break;
-				}
-			}
-		}
-		
-		if (_device_type == AD595)
-		{
-			RawAdcValue current_raw = analogRead(_sensor_pin);
-			_current = current_raw * 500 / 1024;
-		}
-	}
-	
-	void manage_temperature()
-	{
-		update_local_temperature();
-		
-		//check if we're at a lower temperature than the target
-		if(_current + TEMPDELTA < _target)
-			digitalWrite(_power_pin, HIGH);
-			
-		//check if we're at a higher temperature than the target	
-		if(_current - TEMPDELTA > _target)
-			digitalWrite(_power_pin, LOW);
-			
-		//else we must be within the allowed delta of the target
-	
-	}
-	
-};
-
-
-
-/*-----------------------------------------------------------------------------
-	Manages simple I/O device that turns on and off.
------------------------------------------------------------------------------*/
-struct Device
-{
-	Pin _on_pin;
-	boolean _inverting;
-	
-	//constructor
-	Device(Pin onPin, boolean inverting)
-	{
-		_inverting = inverting;
-		_on_pin = onPin;
-		pinMode(_on_pin, OUTPUT);
-	}
-	
-	void turn_on()
-	{
-		digitalWrite(_on_pin, _inverting ? LOW : HIGH);
-	}
-	
-	void turn_off()
-	{
-		digitalWrite(_on_pin, _inverting ? HIGH : LOW);
-	}
-	
-	
-	
-};
-
-	#ifdef HAS_POWER_SUPPLY
-		Device Power_Supply(PS_ON_PIN, true);
-	#endif
-
-	#ifdef HAS_EXTRUDER
-		Heater Extruder(extruder_heater_device, TEMP_0_PIN, HEATER_0_PIN, TEMPTABLE);
-	#endif
-	
-	#ifdef HAS_BED
-		Heater Bed(extruder_heater_device, TEMP_1_PIN, HEATER_1_PIN, BEDTEMPTABLE);
-	#endif
-
-	#ifdef HAS_FAN
-		Device Fan(FAN_PIN, false);
-	#endif
-
-/*
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
-struct code
+
+#if 0
+
+struct G1 : code
 {
-	int _n_value;
-	char * command;
-	//checks that the n-code is equal to the last n-code + 1
-	virtual void process() = 0;
-
-};
-
-code * gcode_factory();
-
-/*-----------------------------------------------------------------------------
------------------------------------------------------------------------------
-
-struct G1 :: code
-{
-	boolean has_x_value;
+	bool has_x_value;
 	double x_value;
 	
-	boolean has_y_value;
+	bool has_y_value;
 	double y_value;
 	
-	boolean has_z_value;
+	bool has_z_value;
 	double z_value;
 	
-	boolean has_e_value;
+	bool has_e_value;
 	double e_value;
 	
-	boolean has_f_value;
+	bool has_f_value;
 	double f_value;
 	
 	G1(char * command, int n_value)
@@ -318,57 +129,9 @@ struct G1 :: code
 			has_f_value = true;
 		}
 	}
-	
-
 };
+#endif
 
-
-/*-----------------------------------------------------------------------------
-M104 (S230) Set extruder temperature to given temp
------------------------------------------------------------------------------*/
-struct M104 : code
-{	
-	int s_value;
-	
-	M104(char * command)
-	{
-		if((s_value =(int) get_value_from_char_array(command, 'S')) = 0)
-		{
-			Serial.println("No argument provided for M104, setting temp to 0...");
-		}
-		
-	}
-	
-	// Will set temp to 0 if argument not found, I consider this good.
-	
-	void process()
-	{
-		#ifdef HAS_EXTRUDER
-			Extruder.setTemperature(s_value);
-		#endif
-	}
-
-};
-
-/*-----------------------------------------------------------------------------
-M80 Turn On Power Supply
------------------------------------------------------------------------------*/
-struct M80 : code
-{	
-
-	M80(char * command)
-	{
-		
-	}
-	
-	void process()
-	{
-		#ifdef HAS_POWER_SUPPLY
-			Power_Supply.turn_on();
-		#endif
-	}
-
-};
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 
@@ -380,21 +143,6 @@ void setup()
 	
 	//create and init device objects
 	//which set up their own pins
-	#ifdef HAS_POWER_SUPPLY
-		Power_Supply.turn_on();
-	#endif
-	
-	#ifdef HAS_EXTRUDER
-		Extruder.setTemperature(DEFAULT_EXTRUDER_TEMP);
-	#endif
-	
-	#ifdef HAS_BED
-		Bed.setTemperature(DEFAULT_BED_TEMP);
-	#endif
-
-	#ifdef HAS_FAN
-		Fan.turn_on();
-	#endif
 
 	//initialize pins
 	init_pins();
@@ -405,11 +153,11 @@ void setup()
 void manage_temperatures()
 {
 	#ifdef HAS_EXTUDER
-		Extruder.manage_temperature();
+		Printer::instance().Extruder.manage_temperature();
 	#endif
 	
 	#ifdef HAS_BED
-		Bed.manage_temperature();
+		Printer::instance().Bed.manage_temperature();
 	#endif
 }
 
@@ -452,6 +200,8 @@ void get_next_command(char * buffer, int buffer_length)
 	buffer[counter-1] = '\0';
 }
 
+/*-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------*/
 void validate(int n_value)
 {
 	if(n_value != line_number + 1)
@@ -473,6 +223,7 @@ void validate(int n_value)
 }
 
 /*-----------------------------------------------------------------------------
+Reads one command from the serial port and returns a code object of the correct type
 -----------------------------------------------------------------------------*/
 code * gcode_factory()
 {
@@ -484,11 +235,12 @@ code * gcode_factory()
 	fix_comments(command);
 	
 	#ifdef DEBUG_GCODE_PROCESSING
-		Serial.printf("Complete read gcode: %s", command);
+		Serial.print("Complete read gcode: ");
+		Serial.println(command);
 	#endif
 	
 	//next part sets variables to attributes of the recieved code
-	boolean has_g_value = false;
+	bool has_g_value = false;
 	int g_value;
 	if(get_value_from_char_array(command, 'G') != 0.0)
 	{
@@ -496,7 +248,7 @@ code * gcode_factory()
 		g_value =(int) get_value_from_char_array(command, 'G');
 	}
 	
-	boolean has_m_value;
+	bool has_m_value;
 	int m_value = 0;
 	if(get_value_from_char_array(command, 'M') != 0.0)
 	{
@@ -504,7 +256,7 @@ code * gcode_factory()
 		m_value = (int)get_value_from_char_array(command, 'M');
 	}
 	
-	boolean has_n_value;
+	bool has_n_value;
 	int n_value = 0;
 	if(get_value_from_char_array(command, 'M') != 0.0)
 	{
@@ -534,11 +286,16 @@ code * gcode_factory()
 	{
 		switch((int) m_value)
 		{
+			case 80:
+				return new M80(command);
+				break;
+
 			case 104:
 				return new M104(command);
-			
-			case 80:
-				//return new M80(command);
+				break;
+				
+			case 105:
+				return new M105(command);
 				break;
 		}
 	}
@@ -572,6 +329,8 @@ double get_value_from_char_array(char * code, char target)
 	return code_value;
 }
 
+/*-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------*/
 void fix_comments(char * command)
 {
 	// Find comment delimiter if any.

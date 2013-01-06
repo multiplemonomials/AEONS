@@ -20,6 +20,7 @@
 #define MOTHERBOARD 33
 
 #include "pins.h"
+#include "Thermometer.h"
 
  //software endstop settings:
  //Endstop pins are set to your board defaults.  If your endstop situation is different, you can change them here.
@@ -45,32 +46,11 @@
 #define THERMISTORHEATER 1
 #define THERMISTORBED 1
 
-// Select one of these only to define how the extruder temp is read.
-const Thermometer extruder_heater_device = THERMISTOR;
-//const Thermometer extruder_heater_device = AD595;
-//MAX6675 CURRENTLY NOT SUPPORTED
-
-// Select one of these only to define how the bed temp is read.
-const Thermometer bed_heater_device = THERMISTOR;
-//const Thermometer bed_heater_device = AD595;
-
-//// Calibration variables
-// X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-const float axis_steps_per_mm[] = {52.504, 26.523, 2267.567, 760.0}; 
-// Metric Prusa Mendel with Makergear geared stepper extruder:
-//float axis_steps_per_unit[] = {80,80,3200/1.25,1380}; 
-// MakerGear Hybrid Prusa Mendel:
-// Z axis value is for .9 stepper(if you have 1.8 steppers for Z, you need to use 2272.7272)
-//float axis_steps_per_unit[] = {104.987, 104.987, 4545.4544, 1487};
-
 //// Endstop Settings
 #define ENDSTOPPULLUPS // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
 // The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
-//If your axes move in one direction ONLY when the endstops are triggered, set [XYZ]_ENDSTOP_INVERT to true here:
-const bool X_ENDSTOP_INVERT = true;
-const bool Y_ENDSTOP_INVERT = true;
-const bool Z_ENDSTOP_INVERT = true;
+
 
 // This determines the communication speed of the printer
 #define BAUDRATE 115200
@@ -83,17 +63,6 @@ const bool Z_ENDSTOP_INVERT = true;
 #define Y_ENABLE_ON 0
 #define Z_ENABLE_ON 0
 #define E_ENABLE_ON 0
-// Disables axis when it's not being used.
-const bool DISABLE_X = false;
-const bool DISABLE_Y = false;
-const bool DISABLE_Z = false;
-const bool DISABLE_E = false;
-
-// Inverting axis direction
-const bool INVERT_X_DIR = false;
-const bool INVERT_Y_DIR = false;
-const bool INVERT_Z_DIR = true;
-const bool INVERT_E_DIR = false;
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -101,17 +70,6 @@ const bool INVERT_E_DIR = false;
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 
-const bool min_software_endstops = false; //If true, axis won't move to coordinates less than zero.
-const bool max_software_endstops = true;  //If true, axis won't move to coordinates greater than the defined lengths below.
-const int X_MAX_LENGTH = 186;
-const int Y_MAX_LENGTH = 231;
-const int Z_MAX_LENGTH = 110;
-
-//// MOVEMENT SETTINGS
-const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
-float max_feedrate[] = {18000, 18000, 100, 18000};
-float homing_feedrate[] = {1500,1500,100};
-bool axis_relative_modes[] = {false, false, false, false};
 
 //// The minimal temperature defines the temperature below which the heater will not be enabled
 #define MINTEMP 0
@@ -139,10 +97,47 @@ bool axis_relative_modes[] = {false, false, false, false};
 //#define FAN_PIN -1
 
 //You can control debugging below the following line:
-//#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
-//#define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
+#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
+#define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
 
- 
+#if HEATER_0_PIN > -1
+	#define HAS_EXTRUDER
+#endif
+
+#if TEMP_1_PIN > -1
+	#define HAS_BED
+#endif
+
+#if FAN_PIN > -1
+	#define HAS_FAN
+#endif
+
+#if PS_ON_PIN > -1
+	#define HAS_POWER_SUPPLY
+#endif
+
+	//If your axes move in one direction ONLY when the endstops are triggered, set [XYZ]_ENDSTOP_INVERT to true here:
+	#define X_ENDSTOP_INVERT true
+	#define Y_ENDSTOP_INVERT true
+	#define Z_ENDSTOP_INVERT true
+	
+	// Disables axis when it's not being used.
+	#define DISABLE_X false
+	#define DISABLE_Y false
+	#define DISABLE_Z false
+	#define DISABLE_E false
+
+	// Inverting axis direction
+	#define INVERT_X_DIR false
+	#define INVERT_Y_DIR false
+	#define INVERT_Z_DIR true
+	#define INVERT_E_DIR false
+	
+	#define MIN_SOFTWARE_ENDSTOPS false //If true, axis won't move to coordinates less than zero.
+	#define MAX_SOFTWARE_ENDSTOPS true  //If true, axis won't move to coordinates greater than the defined lengths below.
+	#define X_MAX_LENGTH 186
+	#define Y_MAX_LENGTH 231
+	#define Z_MAX_LENGTH 110
 
 #endif
 
