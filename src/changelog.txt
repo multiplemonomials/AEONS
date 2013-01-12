@@ -1,0 +1,24 @@
+/* Changelog/Features
+
+*Added Support for Gen7 Board v1.2 and v1.3
+
+*adding many new gcodes
+
+*fixed compilation
+
+PLANNED FEATURES:
+----------------------------------------------------------------------
+*linear move algorithm
+
+*inactivity timeout
+
+
+A	actively
+E	encoporating
+O	objects
+N	not like
+S	Sprinter
+
+
+
+*/
