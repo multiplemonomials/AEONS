@@ -1,10 +1,8 @@
-/* Changelog/Features
+/* Changelog/Features in v-1 (doesn't even work yet...)
 
-*Added Support for Gen7 Board v1.2 and v1.3
+*Moved objects from one big file into many smaller files.  Unfortunately this causes compilation errors.  ???
 
-*adding many new gcodes
-
-*fixed compilation
+*Adding more gcodes.
 
 PLANNED FEATURES:
 ----------------------------------------------------------------------
