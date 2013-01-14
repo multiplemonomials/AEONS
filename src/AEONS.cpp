@@ -11,10 +11,16 @@
 	Gcode:
 
 	Official RepRap M-Codes:
+	M40 - Eject printed object (user specified commands)
 	M104 - Set extruder target temp
+	M105 - Read current temp
 
 	Custom M-Codes:
 	M80  - Turn on Power Supply
+	M81  - Turn off Power Supply
+	M140 - Set bed target temp
+	M116 - Wait for extuder AND bed to heat up
+	
 
 	To Be Implemented
 	-------------------
@@ -24,18 +30,19 @@
 	 G28 - Home all Axis
 	 G90 - Use Absolute Coordinates
 	 G91 - Use Relative Coordinates
-	 G92 - Set current position to cordinates given
+	 G92 - Set assumed position to cordinates given
 
 	RepRap M Codes
-	 M105 - Read current temp
+
 	 M106 - Fan on
 	 M107 - Fan off
 	 M109 - Wait for extruder current temp to reach target temp.
 	 M114 - Display current position
 
 	Custom M Codes
+
 	 M42 - Set output on free pins, on a non pwm pin (over pin 13 on an arduino mega) use S255 to turn it on and S0 to turn it off. Use P to decide the pin (M42 P23 S255) would turn pin 23 on
-	 M81  - Turn off Power Supply
+
 	 M82  - Set E codes absolute (default)
 	 M83  - Set E codes relative while in Absolute Coordinates (G90) mode
 	 M84  - Disable steppers until next move, 
@@ -43,10 +50,7 @@
 	 M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 	 M92  - Set axis_steps_per_unit - same syntax as G92
 	 M115	- Capabilities string
-	 M140 - Set bed target temp
 	 M190 - Wait for bed current temp to reach target temp.
-	 M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
-	 M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 
 	 
 	 By MultipleMonomials and ChatterComa, thx to Kliment
@@ -74,7 +78,6 @@ int current_f_position = 0;
 //last line number
 long line_number = 0;
 
-
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 
@@ -97,34 +100,34 @@ struct G1 : code
 	bool has_f_value;
 	double f_value;
 	
-	G1(char * command, int n_value)
+	G1(char * Printer::instance().command, int n_value)
 	{
 		has_x_value = false;
-		if((x_value = get_value_from_char_array(command, 'X')) != 0.0)
+		if((x_value = get_value_from_char_array(Printer::instance().command, 'X')) != 0.0)
 		{
 			has_x_value = true;
 		}
 		
 		has_y_value = false;
-		if((y_value = get_value_from_char_array(command, 'Y')) != 0.0)
+		if((y_value = get_value_from_char_array(Printer::instance().command, 'Y')) != 0.0)
 		{
 			has_y_value = true;
 		}
 		
 		has_z_value = false;
-		if((z_value = get_value_from_char_array(command, 'Z')) != 0.0)
+		if((z_value = get_value_from_char_array(Printer::instance().command, 'Z')) != 0.0)
 		{
 			has_z_value = true;
 		}
 		
 		has_e_value = false;
-		if((e_value = get_value_from_char_array(command, 'E')) != 0.0)
+		if((e_value = get_value_from_char_array(Printer::instance().command, 'E')) != 0.0)
 		{
 			has_e_value = true;
 		}
 		
 		has_f_value = false;
-		if((f_value = get_value_from_char_array(command, 'F')) != 0.0)
+		if((f_value = get_value_from_char_array(Printer::instance().command, 'F')) != 0.0)
 		{
 			has_f_value = true;
 		}
@@ -148,6 +151,7 @@ void setup()
 	//initialize pins
 	init_pins();
 	
+	//init Priinter object
 	Printer::instance();
 }
 
@@ -171,6 +175,7 @@ void loop()
 	manage_temperatures();
 	if(Serial.available())
 	{
+		get_next_command(Printer::instance().command, sizeof(Printer::instance().command));
 		code * code_recieved = gcode_factory();
 		if(code_recieved!=NULL)
 		{
@@ -178,6 +183,8 @@ void loop()
 			code_recieved->process();
 			delete(code_recieved);
 		}
+		
+		clear_command();
 	}
 }
 
@@ -189,14 +196,22 @@ void loop()
 void get_next_command(char * buffer, int buffer_length)
 {
 	// Keep reading until we come upon a newline character.
+	#ifdef DEBUG_GCODE_PARSING
+		Serial.println("Read character: ");
+	#endif
+	
 	int counter = 0;
+	
 	do
 	{
 		//If you're getting assert failed, increase the MAX_GCODE_SIZE variable in the config file
 		// ASSERT(counter <= buffer_length);
 		buffer[counter] = Serial.read();
-		Serial.print("Read character: ");
-		Serial.println(buffer[counter]);
+		#ifdef DEBUG_GCODE_PARSING
+			Serial.print(buffer[counter]);
+		#endif
+		//stop us going TOO fast and reading before we have any more characters to read
+		delay(2);
 	} 
 	while (buffer[counter++] != '\n');
 	
@@ -207,79 +222,83 @@ void get_next_command(char * buffer, int buffer_length)
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
-void validate(int n_value)
+void verify(int n_value)
 {
-	if(n_value != line_number + 1)
+	if(n_value == line_number + 1)
 	{
-		Serial.print("ERROR: The supplied line number of ");
-		Serial.println(n_value);
-		Serial.print(" is not eqaual to ");
-		Serial.print(line_number);
-		Serial.println(" + 1.");
+		line_number = n_value;
 		return;
 	}
 	
 	else
 	{
 		//update the curent line number
-		line_number = n_value;
+		Serial.print("Supplied line number of ");
+		Serial.println(n_value);
+		Serial.print(" is not eqaual to ");
+		Serial.print(line_number);
+		Serial.println(" + 1.");
 		return;
+
 	}
 }
 
 /*-----------------------------------------------------------------------------
-Reads one command from the serial port and returns a code object of the correct type
+Reads one command from Printer.command and returns a code object of the correct type
+and with the correct data.
 -----------------------------------------------------------------------------*/
 code * gcode_factory()
 {
-	char command[MAX_GCODE_LENGTH];
 	
 	// Get next GCode command.
-	get_next_command(command, sizeof(command));
 	
-	fix_comments(command);
-	
-	#ifdef DEBUG_GCODE_PROCESSING
-		Serial.print("Complete read gcode: ");
-		Serial.println(command);
-	#endif
+	fix_comments(Printer::instance().command);
 	
 	//next part sets variables to attributes of the recieved code
 	bool has_g_value = false;
-	int g_value;
-	if(get_value_from_char_array(command, 'G') != 0.0)
+		//cast here should be OK since mcodes and gcodes are never decimals
+	int g_value =(int) get_value_from_char_array(Printer::instance().command, 'G');
+	
+	if(get_value_from_char_array(Printer::instance().command, 'G') != 0.0)
 	{
 		has_g_value = true;
-		g_value =(int) get_value_from_char_array(command, 'G');
 	}
 	
 	bool has_m_value;
-	int m_value = 0;
-	if(get_value_from_char_array(command, 'M') != 0.0)
+	int m_value = (int)get_value_from_char_array(Printer::instance().command, 'M');
+	if(m_value != 0.0)
 	{
 		has_m_value = true;
-		m_value = (int)get_value_from_char_array(command, 'M');
 	}
 	
 	bool has_n_value;
-	int n_value = 0;
-	if(get_value_from_char_array(command, 'M') != 0.0)
+	int n_value = (int) get_value_from_char_array(Printer::instance().command, 'N');
+	if(get_value_from_char_array(Printer::instance().command, 'M') != 0.0)
 	{
 		has_n_value = true;
-		n_value = (int) get_value_from_char_array(command, 'N');
 	}
 	
-	if(!(has_g_value && has_m_value))
+	if(!(has_g_value || has_m_value))
 		Serial.println("Error! Neither a g-value or an m-value were recieved!");
 	
+	if(n_value > 0)
+		verify(n_value);
 	
-	validate(n_value);
+	#ifdef DEBUG_GCODE_PARSING
+		Serial.print("Parsed gcode details:");
+		Serial.print("G-value: ");
+		Serial.println(g_value);
+		Serial.print("M-value");
+		Serial.println(m_value);
+		Serial.print("N-value: ");
+		Serial.println(n_value);
+	#endif
 	
 	//Now we construct the correct Gcode object
 	if(has_g_value)
 	{
-		//cast here should be OK since mcodes and gcodes are never decimals
-		switch((int)g_value)
+	
+		switch(g_value)
 		{
 			case 0:
 			case 1:
@@ -289,26 +308,43 @@ code * gcode_factory()
 	
 	else if(has_m_value)
 	{
-		switch((int) m_value)
+		switch(m_value)
 		{
+			case 40:
+				return new M40(Printer::instance().command);
+				break;
+				
 			case 80:
-				return new M80(command);
+				return new M80(Printer::instance().command);
+				break;
+				
+			case 81:
+				return new M81(Printer::instance().command);
 				break;
 
 			case 104:
-				return new M104(command);
+				return new M104(Printer::instance().command);
 				break;
 				
 			case 105:
-				return new M105(command);
+				return new M105(Printer::instance().command);
+				break;
+				
+				
+			case 106:
+				return new M106(Printer::instance().command);
+				break;
+				
+			case 107:
+				return new M107(Printer::instance().command);
 				break;
 				
 			case 116:
-				return new M116(command);
+				return new M116(Printer::instance().command);
 				break;
 				
 			case 140:
-				return new M140(command);
+				return new M140(Printer::instance().command);
 				break;
 		}
 	}
@@ -327,12 +363,6 @@ double get_value_from_char_array(char * code, char target)
 
 	if (pointer_to_target == 0)
 	{
-		//check if target is in code
-		#ifdef DEBUG_GCODE_PROCESSING
-			Serial.print("get_value_from_char_array: could not find target char: ");
-			Serial.println(target);
-			Serial.println("This occurs under normal operation, but if you are having problems this could be the cause");
-		#endif
 		return 0;
 	}
 	
@@ -356,6 +386,13 @@ void fix_comments(char * command)
 	}
 }
 
+/*-----------------------------------------------------------------------------
+Sets every member of command to null so it can be reused.
+-----------------------------------------------------------------------------*/
+void clear_command()
+{
+		Printer::instance().command[0] = '\0';
+}
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 void init_pins()

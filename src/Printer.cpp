@@ -63,13 +63,13 @@ Printer::Printer()
 	axis_steps_per_mm[3] = 760.0; 
 	
 	// Select one of these only to define how the extruder temp is read.
-	Thermometer extruder_heater_device = THERMISTOR;
-	//Thermometer extruder_heater_device = AD595;
+	extruder_heater_device = THERMISTOR;
+	//extruder_heater_device = AD595;
 	//MAX6675 CURRENTLY NOT SUPPORTED
 
 	// Select one of these only to define how the bed temp is read.
-	Thermometer bed_heater_device = THERMISTOR;
-	//Thermometer bed_heater_device = AD595;
+	bed_heater_device = THERMISTOR;
+	//bed_heater_device = AD595;
 	
 	//// MOVEMENT SETTINGS
 	max_feedrate[0] = 18000;
@@ -85,6 +85,10 @@ Printer::Printer()
 	axis_relative_modes[1] = false;
 	axis_relative_modes[2] = false;
 	axis_relative_modes[3] = false;
+
+	//Set the custom commands to run when an M40 is recieved.
+	//MAKE SURE IT ENDS WITH \0!!!
+	/* EXAMPLE:*/m40_commands = "M140 S5 \n G1 Y200 F2000 \0";
 }
 
 

@@ -11,6 +11,68 @@
 #include "AEONS.h"
 
 /*-----------------------------------------------------------------------------
+M40--Eject printed objects by running user-specified commands
+-----------------------------------------------------------------------------*/
+M40::M40(char* command)
+{
+
+
+}
+
+void M40::process()
+{
+
+	int line_counter = 0;
+
+	#ifdef DEBUG_GCODE_PROCESSING
+		Serial.print("M40 started.  Operating on line:");
+		Serial.println(Printer::instance().m40_commands);
+	#endif
+
+	for(uint16_t counter = 0; counter < sizeof(Printer::instance().m40_commands);counter ++)
+	{
+		//if the current char is not a newline or a null, set the corresponding place in the input buffer to it
+		if 	((Printer::instance().m40_commands[counter] != '\n') && (Printer::instance().m40_commands[counter] != '\0'))
+		{
+			Printer::instance().command[counter] = 	Printer::instance().m40_commands[counter];
+
+			#ifdef DEBUG_GCODE_PROCESSING
+				Serial.print("M40::Process(): Char: ");
+				Serial.print(Printer::instance().m40_commands[counter]);
+				Serial.println(" Is not a newline. \nAdding to command...");
+			#endif
+
+		}
+
+		//if it IS a newline, call gcode_factory on the command
+		else if(Printer::instance().m40_commands[counter] == '\n')
+		{
+			#ifdef DEBUG_GCODE_PROCESSING
+				Serial.print("M40::Process: Calling gcode factory on line ");
+				Serial.print(++line_counter);
+				Serial.print(" of char*:");
+				Serial.print(Printer::instance().m40_commands);
+			#endif
+
+				code* code_to_process = gcode_factory();
+
+				if (code_to_process != 0)
+					code_to_process->process();
+
+				clear_command();
+		}
+
+		//the for loop SHOULD stop before this triggers but it's here just in case
+		else if(Printer::instance().m40_commands[counter] == '\0')
+		{
+			break;
+		}
+
+	}
+
+}
+
+/*-----------------------------------------------------------------------------
 M80 Turn On Power Supply
 -----------------------------------------------------------------------------*/	
 
@@ -27,7 +89,27 @@ void M80::process()
 }
 
 /*-----------------------------------------------------------------------------
-M104 (S230) Set extruder temperature to given temp
+M81 Turn Off Power Supply
+-----------------------------------------------------------------------------*/
+
+M81::M81(char * command)
+{
+	// TBD
+}
+
+void M81::process()
+{
+	#ifdef HAS_POWER_SUPPLY
+		Printer::instance().Power_Supply.turn_off();
+	#endif
+
+	#ifdef DEBUG_GCODE_PROCESSING
+			Serial.println("Recieved M80, turning off power supply...");
+	#endif
+}
+
+/*-----------------------------------------------------------------------------
+M104 (Sxxx) Set extruder temperature to given temp
 -----------------------------------------------------------------------------*/
 
 M104::M104(char * command)
@@ -35,7 +117,7 @@ M104::M104(char * command)
 	s_value =(int) get_value_from_char_array(command, 'S');
 	if(s_value == 0)
 	{
-		Serial.println("No argument provided for M104, setting temp to 0...");
+		Serial.println("No argument (M104 Sxxx) provided for M104, setting temp to 0...");
 	}
 	
 }
@@ -69,6 +151,39 @@ void M105::process()
 		Serial.println(Printer::instance().Bed.getTemperature());
 	#else
 		Serial.print('\n');
+	#endif
+}
+
+
+/*-----------------------------------------------------------------------------
+M106 Turn On Power Supply
+-----------------------------------------------------------------------------*/
+
+M106::M106(char * command)
+{
+	// TBD
+}
+
+void M106::process()
+{
+	#ifdef HAS_POWER_SUPPLY
+		Printer::instance().Fan.turn_on();
+	#endif
+}
+
+/*-----------------------------------------------------------------------------
+M107 Turn Off Power Supply
+-----------------------------------------------------------------------------*/
+
+M107::M107(char * command)
+{
+	// TBD
+}
+
+void M107::process()
+{
+	#ifdef HAS_POWER_SUPPLY
+		Printer::instance().Fan.turn_off();
 	#endif
 }
 
@@ -134,7 +249,9 @@ M140 <SXXX>--Set bed temperature to given temp
 
 M140::M140(char * command)
 {
-	if((s_value =(int) get_value_from_char_array(command, 'S')) == 0)
+	s_value =(int) get_value_from_char_array(Printer::instance().command, 'S');
+
+	if(s_value == 0)
 	{
 		Serial.println("No argument provided for M140, setting temp to 0...");
 	}
@@ -155,3 +272,5 @@ void M140::process()
 	#endif
 
 }
+
+

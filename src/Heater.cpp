@@ -27,7 +27,7 @@ Heater::Heater(Thermometer deviceType, Pin sensorPin, Pin powerPin, const TempTa
 -----------------------------------------------------------------------------*/
 TempInDegrees Heater::getTemperature()
 {
-	update_local_temperature();
+	manage_temperature();
 	return _current;
 }
 
@@ -35,6 +35,10 @@ TempInDegrees Heater::getTemperature()
 -----------------------------------------------------------------------------*/
 void Heater::setTemperature(TempInDegrees target)
 {
+	#ifdef DEBUG_GCODE_PROCESSING
+		Serial.print("Setting heater to ");
+		Serial.println(target);
+	#endif
 	_target = target;
 	manage_temperature();
 }
@@ -76,6 +80,8 @@ void Heater::update_local_temperature()
 		RawAdcValue current_raw = analogRead(_sensor_pin);
 		_current = current_raw * 500 / 1024;
 	}
+
+	check_temperature();
 }
 
 /*-----------------------------------------------------------------------------
@@ -86,12 +92,29 @@ void Heater::manage_temperature()
 	
 	//check if we're at a lower temperature than the target
 	if(_current + TEMPDELTA < _target)
+	{
 		digitalWrite(_power_pin, HIGH);
-		
+
+	}
 	//check if we're at a higher temperature than the target	
 	if(_current - TEMPDELTA > _target)
 		digitalWrite(_power_pin, LOW);
 		
 	//else we must be within the allowed delta of the target
+
+}
+
+/*-----------------------------------------------------------------------------
+ * Makes sure the current temp is within temp limits.
+-----------------------------------------------------------------------------*/
+void Heater::check_temperature()
+{
+
+	if((_current < MINTEMP) || (_current > MAXTEMP))
+	{
+		Serial.println("!! Temperature out of bounds!  Cooling down...");
+		digitalWrite(_power_pin, LOW);
+		_target = 0;
+	}
 
 }

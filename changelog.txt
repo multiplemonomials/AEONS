@@ -1,11 +1,15 @@
-/* Changelog/Features in v-1 (doesn't even work yet...)
+/* Changelog/Features in v-0.7 (can't move at all...)
 
-*Moved objects from one big file into many smaller files.  Unfortunately this causes compilation errors.  ???
+*tested & debugged nearly all functions (IT WORKS!!)
 
-*Adding more gcodes.
+*fixed dangerously broken M116
+
+*added fan support
 
 PLANNED FEATURES:
 ----------------------------------------------------------------------
+*Multiple (not just 2) extruder support
+
 *linear move algorithm
 
 *inactivity timeout

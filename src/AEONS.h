@@ -4,13 +4,15 @@
 #define AEONS_H
 
 #include "code.h"
+#include "AEONS_Config.h"
 
 code * gcode_factory();
 void manage_temperatures();
 void get_next_command(char * buffer, int buffer_length);
-void validate(int n_value);
+void verify(int n_value);
 double get_value_from_char_array(char * code, char target);
 void fix_comments(char * command);
+void clear_command();
 void init_pins();
 
 #endif

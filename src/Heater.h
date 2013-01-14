@@ -15,7 +15,7 @@
 #include "Arduino.h"
 
 /*-----------------------------------------------------------------------------
-	Implementation of smething that has an active heating device,
+	Implementation of something that has an active heating device,
 	typically an extruder, heated build plate, etc.
 	
 	Has services for setting, getting, and managing the temperature.
@@ -45,6 +45,8 @@ public:
 	void update_local_temperature();
 	
 	void manage_temperature();
+
+	void check_temperature();
 };
 
 #endif

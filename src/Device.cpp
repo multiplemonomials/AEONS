@@ -22,6 +22,11 @@ Device::Device(Pin onPin, bool inverting)
 void Device::turn_on()
 {
 	digitalWrite(_on_pin, _inverting ? LOW : HIGH);
+	#ifdef DEBUG_GCODE_PROCESSING
+		Serial.print("Setting pin ");
+		Serial.print(_on_pin);
+		Serial.println(_inverting ? " to LOW" : " to HIGH");
+	#endif
 }
 
 /*-----------------------------------------------------------------------------

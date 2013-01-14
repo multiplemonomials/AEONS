@@ -48,6 +48,12 @@ public:
 	float homing_feedrate[3];
 	bool axis_relative_modes[4];
 	
+	char* m40_commands;
+
+	//holds the input gcode
+	char command [MAX_GCODE_LENGTH];
+
+
 	
 private:
 

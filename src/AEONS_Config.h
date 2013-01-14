@@ -71,13 +71,13 @@
 #define Z_HOME_DIR -1
 
 
-//// The minimal temperature defines the temperature below which the heater will not be enabled
-#define MINTEMP 0
+// The minimal temperature defines the temperature below which the heater will not be enabled.
+// Protects from open circuits.
+#define MINTEMP 5
 
 //// Experimental max temp
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
-// You should use MINTEMP for thermistor short/failure protection.
 #define MAXTEMP 260
 
 //temperature delta to prevent superfast heater oscilation
@@ -95,10 +95,14 @@
 //This is for controlling a fan to cool down the stepper drivers
 //set it to -1 to disable the fan
 //#define FAN_PIN -1
+//Uncomment one of the following lines to indicate hot your fan is controlled
+//#define FAN_USES_PWM //PWM fan, from a PC
+//#define FAN_ON_OFF //Fan turned on by recieving power.
 
 //You can control debugging below the following line:
 //#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
 #define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
+//#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
 
 #if HEATER_0_PIN > -1
 	#define HAS_EXTRUDER
@@ -108,7 +112,7 @@
 	#define HAS_BED
 #endif
 
-#if FAN_PIN > -1
+#if (FAN_PIN > -1)
 	#define HAS_FAN
 #endif
 
@@ -138,6 +142,8 @@
 	#define X_MAX_LENGTH 186
 	#define Y_MAX_LENGTH 231
 	#define Z_MAX_LENGTH 110
+
+//			NUMERICAL/MOVEMENT SETTINGS HAVE MOVED TO PRINTER.CPP!
 
 #endif
 
