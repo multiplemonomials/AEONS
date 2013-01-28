@@ -1,19 +1,42 @@
-/* Changelog/Features in v-0.7 (can't move at all...)
+/* Changelog/Features in v-0.5 ALPHA (as stable as an elephant on a seesaw...)
 
-*tested & debugged nearly all functions (IT WORKS!!)
+*linear move algorithm FINALLY written
 
-*fixed dangerously broken M116
+*fixed G1 command call
 
-*added fan support
-
-PLANNED FEATURES:
+v0.1 CHECKLIST:
 ----------------------------------------------------------------------
-*Multiple (not just 2) extruder support
+X linear move algorithm
 
-*linear move algorithm
+X Fix G1 call
 
-*inactivity timeout
+O fix syntax highlighting for AEONS.cpp
 
+O step test code
+
+O Axis object
+
+O inactivity timeout
+
+O Multiple extruder support
+
+O Final code review
+
+O TESTING!
+
+KNOW ISSUES/MISSING FEATURES:
+----------------------------------------------------------------------
+Movemement.h: only enable axes when we need to and disable them after we're done
+
+Heater.cpp: MAX6675 support unimplemented
+
+PWM fans unimplemented
+
+gcodes.cpp: will crash/behave unexpectedly if G1 with NO ARRGUMENTS is recieved
+
+assserts.h: ASSERT2 is broken
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A	actively
 E	encoporating

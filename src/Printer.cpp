@@ -3,11 +3,6 @@
 	 
 	By MultipleMonomials and ChatterComa, thx to Kliment
 -----------------------------------------------------------------------------*/
-#ifdef PRINTER_CPP
-
-#else 
-#define PRINTER_CPP
-
 #include "Printer.h"
 
 /*-----------------------------------------------------------------------------
@@ -33,9 +28,14 @@ Printer::Printer()
 		Bed(extruder_heater_device, TEMP_1_PIN, HEATER_1_PIN, BEDTEMPTABLE),
 	#endif
 	#ifdef HAS_FAN
-		Fan(FAN_PIN, false)
+		Fan(FAN_PIN, false),
 	#endif
-	
+
+	// Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float _max_feedrate, float homing_feedrate, bool axis_relative_mode);
+	x_axis(X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, 52.504, 18000, 1500, false),
+	y_axis(Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, 26.523, 18000, 1500, false),
+	z_axis(Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, 2267.567, 100, 100, false),
+	e_axis(E_STEP_PIN, E_DIR_PIN, E_ENABLE_PIN, 760.0, 18000, 100, false)
 {
 	#ifdef HAS_POWER_SUPPLY
 		Power_Supply.turn_on();
@@ -52,16 +52,7 @@ Printer::Printer()
 	#ifdef HAS_FAN
 		Fan.turn_on();
 	#endif
-	
 
-	
-		//// Calibration variables
-	// X, Y, Z, E steps per unit
-	axis_steps_per_mm[0] = 52.504;
-	axis_steps_per_mm[1] = 26.523;
-	axis_steps_per_mm[2] = 2267.567;
-	axis_steps_per_mm[3] = 760.0; 
-	
 	// Select one of these only to define how the extruder temp is read.
 	extruder_heater_device = THERMISTOR;
 	//extruder_heater_device = AD595;
@@ -70,25 +61,14 @@ Printer::Printer()
 	// Select one of these only to define how the bed temp is read.
 	bed_heater_device = THERMISTOR;
 	//bed_heater_device = AD595;
-	
-	//// MOVEMENT SETTINGS
-	max_feedrate[0] = 18000;
-	max_feedrate[1] = 18000;
-	max_feedrate[2] = 100;
-	max_feedrate[3] = 18000;
-	
-	homing_feedrate[0] = 1500;
-	homing_feedrate[1] = 1500;
-	homing_feedrate[2] = 100;
-	
-	axis_relative_modes[0] = false;
-	axis_relative_modes[1] = false;
-	axis_relative_modes[2] = false;
-	axis_relative_modes[3] = false;
 
 	//Set the custom commands to run when an M40 is recieved.
 	//MAKE SURE IT ENDS WITH \0!!!
-	/* EXAMPLE:*/m40_commands = "M140 S5 \n G1 Y200 F2000 \0";
+	/* EXAMPLE:*/m40_commands = (char*) "M140 S5 \n G1 Y200 F2000 \0";
+
+	relative_mode = false;
+
+	last_feedrate = 100;
 }
 
 
@@ -110,4 +90,3 @@ Printer & Printer::instance()
 //Printer::instance().fan.turn_on();
 
 
-#endif

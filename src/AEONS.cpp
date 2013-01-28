@@ -63,6 +63,7 @@
 #include "Printer.h"
 #include "gcodes.h"
 #include "assert.h"
+#include "UnitTest.h"
 
 
 /*-----------------------------------------------------------------------------
@@ -77,63 +78,6 @@ int current_f_position = 0;
 
 //last line number
 long line_number = 0;
-
-/*-----------------------------------------------------------------------------
------------------------------------------------------------------------------*/
-
-#if 0
-
-struct G1 : code
-{
-	bool has_x_value;
-	double x_value;
-	
-	bool has_y_value;
-	double y_value;
-	
-	bool has_z_value;
-	double z_value;
-	
-	bool has_e_value;
-	double e_value;
-	
-	bool has_f_value;
-	double f_value;
-	
-	G1(char * Printer::instance().command, int n_value)
-	{
-		has_x_value = false;
-		if((x_value = get_value_from_char_array(Printer::instance().command, 'X')) != 0.0)
-		{
-			has_x_value = true;
-		}
-		
-		has_y_value = false;
-		if((y_value = get_value_from_char_array(Printer::instance().command, 'Y')) != 0.0)
-		{
-			has_y_value = true;
-		}
-		
-		has_z_value = false;
-		if((z_value = get_value_from_char_array(Printer::instance().command, 'Z')) != 0.0)
-		{
-			has_z_value = true;
-		}
-		
-		has_e_value = false;
-		if((e_value = get_value_from_char_array(Printer::instance().command, 'E')) != 0.0)
-		{
-			has_e_value = true;
-		}
-		
-		has_f_value = false;
-		if((f_value = get_value_from_char_array(Printer::instance().command, 'F')) != 0.0)
-		{
-			has_f_value = true;
-		}
-	}
-};
-#endif
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
@@ -153,6 +97,11 @@ void setup()
 	
 	//init Priinter object
 	Printer::instance();
+	
+	#ifdef RUN_UNIT_TESTS
+	// Invoke unit tests
+	TestAll();
+	#endif
 }
 
 /*-----------------------------------------------------------------------------
@@ -204,8 +153,6 @@ void get_next_command(char * buffer, int buffer_length)
 	
 	do
 	{
-		//If you're getting assert failed, increase the MAX_GCODE_SIZE variable in the config file
-		// ASSERT(counter <= buffer_length);
 		buffer[counter] = Serial.read();
 		#ifdef DEBUG_GCODE_PARSING
 			Serial.print(buffer[counter]);
@@ -302,6 +249,7 @@ code * gcode_factory()
 		{
 			case 0:
 			case 1:
+			return new G1(Printer::instance().command);
 				break;
 		}
 	}
@@ -373,6 +321,26 @@ double get_value_from_char_array(char * code, char target)
 }
 
 /*-----------------------------------------------------------------------------
+	Returns false if the specified character is not found in the char[].
+	This one is used by functions where an argument of 0 is differet from 
+	no argument at all, pretty much just G1.
+-----------------------------------------------------------------------------*/
+bool get_value_from_char_array_bool(char * code, char target, float * return_value)
+{
+	char * pointer_to_target = strchr(code, target);
+
+	if (pointer_to_target == 0)
+	{
+		return false;
+	}
+	
+	char * end_ptr; // strtod returns a double (and a char*) from a char*
+	*return_value = static_cast<float>(strtod((pointer_to_target + 1), &end_ptr));
+	
+	return true;
+}
+
+/*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 void fix_comments(char * command)
 {
@@ -415,19 +383,19 @@ void init_pins()
   
   #if (X_ENABLE_PIN > -1)
     pinMode(X_ENABLE_PIN, OUTPUT);
-  if(!X_ENABLE_ON) digitalWrite(X_ENABLE_PIN,HIGH);
+  if(!ENABLE_PINS_INVERTING) digitalWrite(X_ENABLE_PIN,HIGH);
   #endif
   #if (Y_ENABLE_PIN > -1)
     pinMode(Y_ENABLE_PIN, OUTPUT);
-  if(!Y_ENABLE_ON) digitalWrite(Y_ENABLE_PIN,HIGH);
+  if(!ENABLE_PINS_INVERTING) digitalWrite(Y_ENABLE_PIN,HIGH);
   #endif
   #if (Z_ENABLE_PIN > -1)
     pinMode(Z_ENABLE_PIN, OUTPUT);
-  if(!Z_ENABLE_ON) digitalWrite(Z_ENABLE_PIN,HIGH);
+  if(!ENABLE_PINS_INVERTING) digitalWrite(Z_ENABLE_PIN,HIGH);
   #endif
   #if (E_ENABLE_PIN > -1)
     pinMode(E_ENABLE_PIN, OUTPUT);
-  if(!E_ENABLE_ON) digitalWrite(E_ENABLE_PIN,HIGH);
+  if(!ENABLE_PINS_INVERTING) digitalWrite(E_ENABLE_PIN,HIGH);
   #endif
   
   //endstops and pullups

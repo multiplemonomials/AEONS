@@ -1,14 +1,66 @@
-/*----------------------------------__-----------------------------------------
+/*-----------------------------------------------------------------------------
 	gcodes.cpp
 	Code file fr all of the gcode objects
 	By MultipleMonomials and ChatterComa, thx to Kliment
 -----------------------------------------------------------------------------*/
 
 #include "gcodes.h"
-#include "AEONS_Config.h"
-#include "Arduino.h"
-#include "Printer.h"
-#include "AEONS.h"
+
+
+/*-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------*/
+
+G1::G1(char * command)
+{
+	// Parse the command and extract parameters if present.
+	// If we didn't recieve an argument, "move" to the current position
+	if(!get_value_from_char_array_bool(command, 'X', &x_value))
+	{
+		x_value = Printer::instance().x_axis._current_position;
+	}
+
+	if(!get_value_from_char_array_bool(command, 'Y', &y_value))
+	{
+		y_value = Printer::instance().y_axis._current_position;
+	}
+
+	if(!get_value_from_char_array_bool(command, 'Z', &z_value))
+	{
+		z_value = Printer::instance().z_axis._current_position;
+	}
+
+	if(!get_value_from_char_array_bool(command, 'E', &e_value))
+	{
+		e_value = Printer::instance().e_axis._current_position;
+	}
+
+	// Zero returned if F not supplied in command.
+	f_value = get_value_from_char_array(command, 'F');
+	if (f_value == 0.0)
+	{
+		//an f value was not included in the command, so use the last provided one
+		f_value = Printer::instance().last_feedrate;
+	}
+}
+
+void G1::process()
+{
+	//-------------------------------------------------------------------------------
+	//if we are in absolute mode, convert to relative coodinates
+	//-------------------------------------------------------------------------------
+	if(!Printer::instance().relative_mode)
+	{
+		x_value = x_value - Printer::instance().x_axis.getCurrentPosition();
+		y_value = y_value - Printer::instance().y_axis.getCurrentPosition();
+		z_value = z_value - Printer::instance().z_axis.getCurrentPosition();
+		e_value = e_value - Printer::instance().e_axis.getCurrentPosition();
+	}
+
+
+	//void move(float x_target, float y_target, float z_target, float e_target, int feedrate, bool absolute_mode)
+	move(x_value, y_value, z_value, e_value, f_value);
+}
+
 
 /*-----------------------------------------------------------------------------
 M40--Eject printed objects by running user-specified commands

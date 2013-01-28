@@ -30,5 +30,5 @@ AEONS Firmware
 
 2. Method/Object Descriptions:
 -------------------------------------------------------------------------------------------
-TBD
+Printer AKA Printer::instance()	|| Stores variables and objects about the printer, like heater objects and settings. 
 

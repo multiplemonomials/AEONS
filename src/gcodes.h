@@ -1,4 +1,4 @@
-/*----------------------------------__-----------------------------------------
+/*-----------------------------------------------------------------------------
 	gcodes.h
 	 
 	By MultipleMonomials and ChatterComa, thx to Kliment
@@ -8,6 +8,40 @@
 #define GCODES_H
 
 #include "code.h"
+#include "AEONS_Config.h"
+#include "Arduino.h"
+#include "Printer.h"
+#include "AEONS.h"
+#include "Movement.h"
+
+/*-----------------------------------------------------------------------------
+G1--Linear Move
+-----------------------------------------------------------------------------*/
+
+struct G1 : code
+{
+//	bool has_x_value;
+	float x_value;
+
+//	bool has_y_value;
+	float y_value;
+
+//	bool has_z_value;
+	float z_value;
+
+//	bool has_e_value;
+	float e_value;
+
+//	bool has_f_value;
+	float f_value;
+
+	G1(char * command);
+
+	void process();
+
+	virtual ~G1(){}
+
+};
 
 /*-----------------------------------------------------------------------------
 M40--Eject printed objects by running user-specified commands

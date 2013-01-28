@@ -4,12 +4,11 @@
 	By MultipleMonomials and ChatterComa, thx to Kliment
 -----------------------------------------------------------------------------*/
 
-#ifdef PRINTER_H
-#error "Printer redefined"
-#else
+#ifndef PRINTER_H
 #define PRINTER_H
 #include "Device.h"
 #include "Heater.h"
+#include "Axis.h"
 
 
 /*-----------------------------------------------------------------------------
@@ -19,6 +18,7 @@ class Printer
 {
 
 public:
+
 	#ifdef HAS_POWER_SUPPLY
 	Device Power_Supply;
 	#endif
@@ -34,25 +34,24 @@ public:
 	#ifdef HAS_FAN
 	Device Fan;
 	#endif	
-
-	//// Calibration variables
-	// X, Y, Z, E steps per unit
-	float axis_steps_per_mm[4]; 
 	
 	Thermometer extruder_heater_device;
 
 	Thermometer bed_heater_device;
 	
-	//// MOVEMENT SETTINGS
-	float max_feedrate[4];
-	float homing_feedrate[3];
-	bool axis_relative_modes[4];
-	
+	Axis x_axis;
+	Axis y_axis;
+	Axis z_axis;
+	Axis e_axis;
+
 	char* m40_commands;
 
 	//holds the input gcode
 	char command [MAX_GCODE_LENGTH];
 
+	bool relative_mode;
+
+	float last_feedrate;
 
 	
 private:
@@ -71,7 +70,3 @@ public:
 };
 
 #endif
-
-
-
-//Printer *	_instance;

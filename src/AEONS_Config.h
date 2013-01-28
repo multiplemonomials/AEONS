@@ -59,10 +59,7 @@
 #include "thermistortables.h"
 
 // For Inverting Stepper Enable Pins (Active Low) use 0 (e.g.polulu), Non Inverting (Active High) use 1
-#define X_ENABLE_ON 0
-#define Y_ENABLE_ON 0
-#define Z_ENABLE_ON 0
-#define E_ENABLE_ON 0
+#define ENABLE_PINS_INVERTING 0
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -77,11 +74,11 @@
 
 //// Experimental max temp
 // When temperature exceeds max temp, your heater will be switched off.
-// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
+// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor failure!
 #define MAXTEMP 260
 
 //temperature delta to prevent superfast heater oscilation
-#define TEMPDELTA 5
+#define TEMPDELTA 2
 
 // Lengh of gcode storage array
 #define MAX_GCODE_LENGTH 50
@@ -95,14 +92,17 @@
 //This is for controlling a fan to cool down the stepper drivers
 //set it to -1 to disable the fan
 //#define FAN_PIN -1
-//Uncomment one of the following lines to indicate hot your fan is controlled
-//#define FAN_USES_PWM //PWM fan, from a PC
-//#define FAN_ON_OFF //Fan turned on by recieving power.
+//Uncomment one of the following lines to indicate how your fan is controlled
+//#define FAN_USES_PWM //PWM fan, from a PC.  CURRENTLY NOT SUPPORTED
+#define FAN_ON_OFF //Fan turned on by recieving power.
 
 //You can control debugging below the following line:
 //#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
 #define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
-//#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
+#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
+#define DEBUG_MOVEMENT
+
+#define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
 
 #if HEATER_0_PIN > -1
 	#define HAS_EXTRUDER
