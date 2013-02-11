@@ -4,13 +4,15 @@
 
 *fixed G1 command call
 
+*fixed some bugs
+
 v0.1 CHECKLIST:
 ----------------------------------------------------------------------
-X linear move algorithm
+O linear move algorithm
 
 X Fix G1 call
 
-O fix syntax highlighting for AEONS.cpp
+X fix syntax highlighting for AEONS.cpp
 
 O step test code
 
@@ -24,17 +26,28 @@ O Final code review
 
 O TESTING!
 
-KNOW ISSUES/MISSING FEATURES:
+KNOWN ISSUES/MISSING FEATURES:
 ----------------------------------------------------------------------
-Movemement.h: only enable axes when we need to and disable them after we're done
+//X means fixed, O means still wild
 
-Heater.cpp: MAX6675 support unimplemented
+X gcodes.cpp: will crash/behave unexpectedly if G1 with NO ARGUMENTS is recieved
 
-PWM fans unimplemented
+X AEONS_Config.h: move movement settings from Printer.cpp Axis constructor calls
 
-gcodes.cpp: will crash/behave unexpectedly if G1 with NO ARRGUMENTS is recieved
+X Movement.cpp: Max feedrate? What max feedrate?
+_______________________________________________________________________
 
-assserts.h: ASSERT2 is broken
+O Movemement.cpp: only enable axes when we need to and disable them after we're done
+
+O Heater.cpp: MAX6675 support unimplemented
+
+O Device.h: PWM fans unimplemented
+
+O Calculation of max feedrates needs to take angle into account.
+
+O assserts.h: ASSERT2 is broken
+
+O Movement.cpp: Software endstops? What software endstops?
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

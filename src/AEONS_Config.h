@@ -104,6 +104,45 @@
 
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
 
+//MOVEMENT SETTINGS
+#define X_STEPS_PER_MM 52.504
+#define Y_STEPS_PER_MM 26.523
+#define Z_STEPS_PER_MM 2267.567
+#define E_STEPS_PER_MM 760.0
+
+//feedrate limits for axes--defaults should be OK for most people
+#define XY_AXES_MAX_FEEDRATE 18000
+#define Z_AXIS_MAX_FEEDRATE 100
+#define E_AXIS_MAX_FEEDRATE 18000
+
+//feedrates to use when sent a G28 Home All Axes
+#define XY_AXES_HOMING_FEEDRATE 1500
+#define ZE_AXES_HOMING_FEEDRATE 75
+
+
+//If your axes move in one direction ONLY when the endstops are triggered, set [XYZ]_ENDSTOP_INVERT to true here:
+#define X_ENDSTOP_INVERT true
+#define Y_ENDSTOP_INVERT true
+#define Z_ENDSTOP_INVERT true
+
+// Disables axis when it's not being used.
+#define DISABLE_X false
+#define DISABLE_Y false
+#define DISABLE_Z false
+#define DISABLE_E false
+
+// Inverting axis direction
+#define INVERT_X_DIR false
+#define INVERT_Y_DIR false
+#define INVERT_Z_DIR true
+#define INVERT_E_DIR false
+
+#define MIN_SOFTWARE_ENDSTOPS false //If true, axis won't move to coordinates less than zero.
+#define MAX_SOFTWARE_ENDSTOPS true  //If true, axis won't move to coordinates greater than the defined lengths below.
+#define X_MAX_LENGTH 186
+#define Y_MAX_LENGTH 231
+#define Z_MAX_LENGTH 110
+
 #if HEATER_0_PIN > -1
 	#define HAS_EXTRUDER
 #endif
@@ -120,30 +159,6 @@
 	#define HAS_POWER_SUPPLY
 #endif
 
-	//If your axes move in one direction ONLY when the endstops are triggered, set [XYZ]_ENDSTOP_INVERT to true here:
-	#define X_ENDSTOP_INVERT true
-	#define Y_ENDSTOP_INVERT true
-	#define Z_ENDSTOP_INVERT true
-	
-	// Disables axis when it's not being used.
-	#define DISABLE_X false
-	#define DISABLE_Y false
-	#define DISABLE_Z false
-	#define DISABLE_E false
-
-	// Inverting axis direction
-	#define INVERT_X_DIR false
-	#define INVERT_Y_DIR false
-	#define INVERT_Z_DIR true
-	#define INVERT_E_DIR false
-	
-	#define MIN_SOFTWARE_ENDSTOPS false //If true, axis won't move to coordinates less than zero.
-	#define MAX_SOFTWARE_ENDSTOPS true  //If true, axis won't move to coordinates greater than the defined lengths below.
-	#define X_MAX_LENGTH 186
-	#define Y_MAX_LENGTH 231
-	#define Z_MAX_LENGTH 110
-
-//			NUMERICAL/MOVEMENT SETTINGS HAVE MOVED TO PRINTER.CPP!
 
 #endif
 

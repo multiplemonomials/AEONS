@@ -32,10 +32,10 @@ Printer::Printer()
 	#endif
 
 	// Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float _max_feedrate, float homing_feedrate, bool axis_relative_mode);
-	x_axis(X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, 52.504, 18000, 1500, false),
-	y_axis(Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, 26.523, 18000, 1500, false),
-	z_axis(Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, 2267.567, 100, 100, false),
-	e_axis(E_STEP_PIN, E_DIR_PIN, E_ENABLE_PIN, 760.0, 18000, 100, false)
+	x_axis(X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_STEPS_PER_MM, XY_AXES_MAX_FEEDRATE, XY_AXES_HOMING_FEEDRATE),
+	y_axis(Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_STEPS_PER_MM, XY_AXES_MAX_FEEDRATE, XY_AXES_HOMING_FEEDRATE),
+	z_axis(Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_STEPS_PER_MM, Z_AXIS_MAX_FEEDRATE, ZE_AXES_HOMING_FEEDRATE),
+	e_axis(E_STEP_PIN, E_DIR_PIN, E_ENABLE_PIN, E_STEPS_PER_MM, E_AXIS_MAX_FEEDRATE, ZE_AXES_HOMING_FEEDRATE)
 {
 	#ifdef HAS_POWER_SUPPLY
 		Power_Supply.turn_on();

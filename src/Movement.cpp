@@ -1,14 +1,18 @@
 #include "Movement.h"
 #include "Assert.h"
 
+/*-----------------------------------------------------------------------------
+	Modulo operation with special case for zero-valued dividend.
+-----------------------------------------------------------------------------*/
 int modulo(int dividend, int divisor)
 {
-	if (dividend == 0)
-			return 0;
-	else
-		return dividend%divisor;
+	return (dividend == 0) ? 0 : dividend % divisor;
 }
 
+/*-----------------------------------------------------------------------------
+ 	 Multiply operation that always returns a non-zero result, even
+ 	 if zero-valued arguments arte provided.
+-----------------------------------------------------------------------------*/
 int multiply_no_0(int value1, int value2)
 {
 	if(value1 == 0)
@@ -26,27 +30,24 @@ int multiply_no_0(int value1, int value2)
 
 
 /*-----------------------------------------------------------------------------
-
+	Greatest Common Divisor.  Returns the largest value that all arguments
+	can be divided by leaving no remainder.
 -----------------------------------------------------------------------------*/
-unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val)
+unsigned int GCD(unsigned int x_val, unsigned int y_val)
 {
-	// Algorithm check.
-	ASSERT( ((x_val * y_val) % GCD(x_val, y_val)) == 0);
-	ASSERT( ((z_val * e_val) % GCD(z_val, e_val)) == 0);
+	if (x_val == 0 && y_val == 0)
+		{
+			return 1;
+		}
+	if (x_val == 0)
+	{
+		x_val = 1;
+	}
 
-	unsigned int LCM_of_x_and_y = (multiply_no_0(x_val, y_val)) / GCD(x_val, y_val);
-	unsigned int LCM_of_z_and_e = (multiply_no_0(z_val, e_val)) /	GCD(z_val, e_val);
-	unsigned int final_LCM 		= (multiply_no_0(LCM_of_x_and_y, LCM_of_z_and_e)) / GCD(LCM_of_x_and_y, LCM_of_z_and_e);
-	return final_LCM;
-
-}
-
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-int GCD(int x_val, int y_val)
-{
+	if(y_val == 0)
+	{
+		y_val = 1;
+	}
     for (;;)
     {
         if (x_val == 0)
@@ -67,6 +68,36 @@ int GCD(int x_val, int y_val)
     return 1;
 
 }
+
+/*-----------------------------------------------------------------------------
+	Least Common Multiple.  The smallest positive integer that is divisible by
+	all supplied arguments. Zero arguments don't count.
+-----------------------------------------------------------------------------*/
+unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val)
+{
+	// Algorithm check.
+	//ASSERT( (multiply_no_0(x_val, y_val) % GCD(x_val, y_val)) == 0);
+	//ASSERT( ((z_val * e_val) % GCD(z_val, e_val)) == 0);
+
+	unsigned int LCM_of_x_and_y = (multiply_no_0(x_val, y_val)) / GCD(x_val, y_val); //264/1
+	unsigned int LCM_of_z_and_e = (multiply_no_0(z_val, e_val)) / GCD(z_val, e_val); //1/1
+	unsigned int final_LCM 		= (multiply_no_0(LCM_of_x_and_y, LCM_of_z_and_e)) / GCD(LCM_of_x_and_y, LCM_of_z_and_e);
+
+	Serial.println("LCM: ");
+	Serial.println(LCM_of_x_and_y);
+	Serial.println(LCM_of_z_and_e);
+	Serial.println(final_LCM);
+	Serial.println("xy: ");
+	Serial.print(multiply_no_0(x_val, y_val));
+	Serial.println("GCD: ");
+	Serial.print(GCD(x_val, y_val));
+	Serial.println("END");
+
+	return final_LCM;
+
+
+}
+
 
 /*-----------------------------------------------------------------------------
 
@@ -121,13 +152,6 @@ void step_loop
 -----------------------------------------------------------------------------*/
 void move(float x_target, float y_target, float z_target, float e_target, float feedrate)
 {
-	//-------------------------------------------------------------------------------
-	// Enable Axes
-	//-------------------------------------------------------------------------------
-	Printer::instance().x_axis.enable();
-	Printer::instance().y_axis.enable();
-	Printer::instance().z_axis.enable();
-	Printer::instance().e_axis.enable();
 
 	//-------------------------------------------------------------------------------
 	// if some moves are negative, set the axis to move in a negative direction,
@@ -145,6 +169,16 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	Printer::instance().e_axis.set_positive_direction((e_target >= 0));
 	e_target = abs(e_target);
 
+	//-------------------------------------------------------------------------------
+	// Don't move at all if we didn't get any arguments
+	//-------------------------------------------------------------------------------
+	if(	x_target == 0 &&
+		y_target == 0 &&
+		z_target == 0 &&
+		e_target == 0)
+	{
+		return;
+	}
 
 	//-------------------------------------------------------------------------------
 	// Convert from mm to steps for each axis.
@@ -154,16 +188,124 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	StepCount total_z_steps = z_target * Printer::instance().z_axis._steps_per_mm;
 	StepCount total_e_steps = e_target * Printer::instance().e_axis._steps_per_mm;
 
+	//-------------------------------------------------------------------------------
+	// Enable Axes
+	//-------------------------------------------------------------------------------
+	if(total_x_steps != 0)
+	{
+		Printer::instance().x_axis.enable();
+	}
+
+	if(total_y_steps != 0)
+	{
+		Printer::instance().y_axis.enable();
+	}
+
+	if(total_z_steps != 0)
+	{
+		Printer::instance().z_axis.enable();
+	}
+
+	if(total_e_steps != 0)
+	{
+		Printer::instance().e_axis.enable();
+	}
+
+	//-------------------------------------------------------------------------------
+	// Make sure feedrates are within limits
+	//-------------------------------------------------------------------------------
+	{
+		int proposed_x_feedrate;
+		int proposed_y_feedrate;
+		int proposed_z_feedrate;
+		int proposed_e_feedrate;
+
+		if(feedrate > Printer::instance().x_axis._max_feedrate && !(x_target == 0))
+		{
+			proposed_x_feedrate = Printer::instance().x_axis._max_feedrate;
+		}
+		else
+		{
+			proposed_x_feedrate = feedrate;
+		}
+
+		if(feedrate > Printer::instance().y_axis._max_feedrate && !(y_target == 0))
+		{
+			proposed_y_feedrate = Printer::instance().y_axis._max_feedrate;
+		}
+		else
+		{
+			proposed_y_feedrate = feedrate;
+		}
+
+		if(feedrate > Printer::instance().z_axis._max_feedrate && !(z_target == 0))
+		{
+			proposed_z_feedrate = Printer::instance().z_axis._max_feedrate;
+		}
+		else
+		{
+			proposed_z_feedrate = feedrate;
+		}
+
+		if(feedrate > Printer::instance().e_axis._max_feedrate && !(e_target == 0))
+		{
+			proposed_e_feedrate = Printer::instance().e_axis._max_feedrate;
+		}
+		else
+		{
+			proposed_e_feedrate = feedrate;
+		}
+
+
+		feedrate = min(min(proposed_x_feedrate, proposed_y_feedrate), min(proposed_z_feedrate, proposed_e_feedrate));
+	}
+
 
 	//-------------------------------------------------------------------------------
 	// Calculate loops per tick and axis steps per loop
 	//-------------------------------------------------------------------------------
 	unsigned int loops_to_do = LCM(total_x_steps, total_y_steps, total_z_steps, total_e_steps);
 
-	StepCount x_interval = loops_to_do / total_x_steps;
-	StepCount y_interval = loops_to_do / total_y_steps;
-	StepCount z_interval = loops_to_do / total_z_steps;
-	StepCount e_interval = loops_to_do / total_e_steps;
+	StepCount x_interval;
+	StepCount y_interval;
+	StepCount z_interval;
+	StepCount e_interval;
+
+	if(total_x_steps == 0)
+	{
+		x_interval = loops_to_do + 1;
+	}
+	else
+	{
+		x_interval = loops_to_do / total_x_steps;
+	}
+
+	if(total_y_steps == 0)
+	{
+		y_interval = loops_to_do + 1;
+	}
+	else
+	{
+		y_interval = loops_to_do / total_y_steps;
+	}
+
+	if(total_z_steps == 0)
+	{
+		z_interval = loops_to_do + 1;
+	}
+	else
+	{
+		z_interval = loops_to_do / total_z_steps;
+	}
+
+	if(total_e_steps == 0)
+	{
+		e_interval = loops_to_do + 1;
+	}
+	else
+	{
+		e_interval = loops_to_do / total_e_steps;
+	}
 
 	//-------------------------------------------------------------------------------
 	// Calculate delays from feedrate
@@ -172,7 +314,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	// Calculate delay per mm of movement to achieve the stated feed rate.
 	long move_distance_in_mm            = x_target + y_target + z_target + e_target;
 	float feedrate_mm_per_millisecond 	= feedrate / (60.0 * 1000.0);
-	// float delay_millisecond_per_mm 		= move_distance_in_mm + feedrate/ feedrate_mm_per_millisecond;
 	float move_time_in_ms				= move_distance_in_mm / feedrate_mm_per_millisecond;
 	float time_in_ms_per_loop			= move_time_in_ms / loops_to_do;
 
@@ -191,7 +332,7 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	//-------------------------------------------------------------------------------
 
 	#ifdef DEBUG_MOVEMENT
-		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.println(__val)
+		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.print(": "); Serial.println(__val)
 		Serial.println("Calling move function with parameters:");
 		DISPLAY_IT(time_in_ms_per_loop);
 		DISPLAY_IT(loops_to_do);
@@ -204,6 +345,7 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 		DISPLAY_IT(z_interval);
 		DISPLAY_IT(e_interval);
 		DISPLAY_IT(move_time_in_ms);
+		DISPLAY_IT(move_distance_in_mm);
 		#undef DISPLAY_IT
 	#endif
 

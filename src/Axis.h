@@ -25,9 +25,8 @@ struct Axis
 
 	float _max_feedrate;
 	float _homing_feedrate;
-	bool _axis_relative_mode;
 
-	Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float _max_feedrate, float homing_feedrate, bool axis_relative_mode);
+	Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float _max_feedrate, float homing_feedrate);
 
 	void set_positive_direction(bool positive_direction);
 

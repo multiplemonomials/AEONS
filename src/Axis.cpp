@@ -5,13 +5,12 @@
 -----------------------------------------------------------------------------*/
 #include "Axis.h"
 
-Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float max_feedrate, float homing_feedrate, bool axis_relative_mode)
+Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float max_feedrate, float homing_feedrate)
 {
 	_step_pin = step_pin;
 	_enable_pin = enable_pin;
 	_direction_pin = direction_pin;
 
-	_axis_relative_mode = axis_relative_mode;
 	_homing_feedrate = homing_feedrate;
 	_steps_per_mm = steps_per_mm;
 	_max_feedrate = max_feedrate;

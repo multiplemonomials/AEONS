@@ -20,12 +20,12 @@ unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, uns
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-int GCD(int x_val, int y_val, int z_val, int e_val);
+unsigned int GCD(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val);
 
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-int GCD(int x_val, int y_val);
+unsigned int GCD(unsigned int x_val, unsigned int y_val);
 
 /*-----------------------------------------------------------------------------
 

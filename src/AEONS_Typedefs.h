@@ -5,7 +5,7 @@ typedef int TempInDegrees;
 typedef int RawAdcValue;
 typedef int Pin;
 
-typedef unsigned int StepCount;
+typedef unsigned long StepCount;
 
 #endif
 
