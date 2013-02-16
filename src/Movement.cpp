@@ -104,7 +104,7 @@ unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, uns
 -----------------------------------------------------------------------------*/
 void step_loop
 (
-	unsigned int time_in_ms_per_loop,
+	delay_base* delayer,
 	unsigned int loop_count,
 	StepCount x_steps_per_tick,
 	StepCount y_steps_per_tick,
@@ -143,8 +143,10 @@ void step_loop
 			e_steps_counter = e_steps_per_tick;
 		}
 
-		delay(time_in_ms_per_loop);
+		(*delayer)();
 	}
+
+	delete delayer;
 }
 
 /*-----------------------------------------------------------------------------
@@ -353,7 +355,7 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	// Call the final function!!
 	//-------------------------------------------------------------------------------
 
-	step_loop(time_in_ms_per_loop, loops_to_do, x_interval, y_interval, z_interval, e_interval);
+	step_loop(delay_base::delay_factory(time_in_ms_per_loop), loops_to_do, x_interval, y_interval, z_interval, e_interval);
 
 	Printer::instance().last_feedrate = feedrate;
 

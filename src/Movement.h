@@ -11,6 +11,7 @@
 #include "AEONS.h"
 #include "Arduino.h"
 #include "AEONS_Typedefs.h"
+#include "delay.h"
 
 /*-----------------------------------------------------------------------------
 
@@ -35,19 +36,19 @@ void get_delay_from_feedrate(int x_val, int y_val, int z_val, int e_val, int fee
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
+void move(float x_target, float y_target, float z_target, float e_target, float feedrate);
+
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
 void step_loop
 (
-	unsigned int time_in_ms_per_loop,
+	delay_base* delayer,
 	unsigned int loop_count,
 	StepCount x_steps_per_tick,
 	StepCount y_steps_per_tick,
 	StepCount z_steps_per_tick,
 	StepCount e_steps_per_tick
 );
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-void move(float x_target, float y_target, float z_target, float e_target, float feedrate);
 
 #endif

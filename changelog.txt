@@ -8,7 +8,7 @@
 
 v0.1 CHECKLIST:
 ----------------------------------------------------------------------
-O linear move algorithm
+X linear move algorithm
 
 X Fix G1 call
 
@@ -35,6 +35,9 @@ X gcodes.cpp: will crash/behave unexpectedly if G1 with NO ARGUMENTS is recieved
 X AEONS_Config.h: move movement settings from Printer.cpp Axis constructor calls
 
 X Movement.cpp: Max feedrate? What max feedrate?
+
+X Movement.cpp: use functors to fix the delay time floating point issues
+
 _______________________________________________________________________
 
 O Movemement.cpp: only enable axes when we need to and disable them after we're done
@@ -43,11 +46,13 @@ O Heater.cpp: MAX6675 support unimplemented
 
 O Device.h: PWM fans unimplemented
 
-O Calculation of max feedrates needs to take angle into account.
+O Calculation of max feedrates needs to take angle into account. (?)
 
-O assserts.h: ASSERT2 is broken
+O assserts.h: ASSERT2 is broken (needs verification)
 
 O Movement.cpp: Software endstops? What software endstops?
+
+O Movement.cpp: Add a debug thing to measure the algorithm time
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
