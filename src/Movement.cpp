@@ -154,7 +154,12 @@ void step_loop
 -----------------------------------------------------------------------------*/
 void move(float x_target, float y_target, float z_target, float e_target, float feedrate)
 {
-
+	//-------------------------------------------------------------------------------
+	//	Debugging for measuring algorithm time
+	//-------------------------------------------------------------------------------
+	#ifdef DEBUG_MOVEMENT
+		unsigned long start_millis = millis();
+	#endif
 	//-------------------------------------------------------------------------------
 	// if some moves are negative, set the axis to move in a negative direction,
 	// then convert to positive value.
@@ -334,7 +339,10 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	//-------------------------------------------------------------------------------
 
 	#ifdef DEBUG_MOVEMENT
+		unsigned long calculation_time_millisconds = millis() - start_millis;
+
 		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.print(": "); Serial.println(__val)
+		DISPLAY_IT(calculation_time_millisconds);
 		Serial.println("Calling move function with parameters:");
 		DISPLAY_IT(time_in_ms_per_loop);
 		DISPLAY_IT(loops_to_do);
@@ -359,7 +367,10 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 
 	Printer::instance().last_feedrate = feedrate;
 
-#ifdef DEBUG_MOVEMENT
-	Serial.println("Finished Move!");
-#endif
+	#ifdef DEBUG_MOVEMENT
+		Serial.println("Finished Move!");
+		Serial.print("Move took ");
+		Serial.print(millis() - start_millis);
+		Serial.println("milliseconds");
+	#endif
 }

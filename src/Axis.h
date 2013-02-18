@@ -19,6 +19,7 @@ struct Axis
 	float _current_position;
 	float _steps_per_mm;
 
+	unsigned int _step_delay;
 	Pin _enable_pin;
 	Pin _step_pin;
 	Pin _direction_pin;
@@ -26,7 +27,7 @@ struct Axis
 	float _max_feedrate;
 	float _homing_feedrate;
 
-	Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float _max_feedrate, float homing_feedrate);
+	Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float max_feedrate, float homing_feedrate, unsigned int step_delay);
 
 	void set_positive_direction(bool positive_direction);
 

@@ -38,6 +38,8 @@ X Movement.cpp: Max feedrate? What max feedrate?
 
 X Movement.cpp: use functors to fix the delay time floating point issues
 
+X Movement.cpp: Add a debug thing to measure the algorithm time
+
 _______________________________________________________________________
 
 O Movemement.cpp: only enable axes when we need to and disable them after we're done
@@ -48,11 +50,9 @@ O Device.h: PWM fans unimplemented
 
 O Calculation of max feedrates needs to take angle into account. (?)
 
-O assserts.h: ASSERT2 is broken (needs verification)
+O asserts.h: ASSERT2 is broken (needs verification)
 
 O Movement.cpp: Software endstops? What software endstops?
-
-O Movement.cpp: Add a debug thing to measure the algorithm time
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

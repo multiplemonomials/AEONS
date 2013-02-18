@@ -5,8 +5,9 @@
 -----------------------------------------------------------------------------*/
 #include "Axis.h"
 
-Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float max_feedrate, float homing_feedrate)
+Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, float steps_per_mm, float max_feedrate, float homing_feedrate, unsigned int step_delay)
 {
+	_step_delay = step_delay;
 	_step_pin = step_pin;
 	_enable_pin = enable_pin;
 	_direction_pin = direction_pin;
@@ -35,5 +36,7 @@ void Axis::disable()
 
 void Axis::step()
 {
-
+	digitalWrite(_step_pin, HIGH);
+	delayMicroseconds(_step_delay); //funky, but this is how Sprinter does it
+	digitalWrite(_step_pin, LOW);
 }

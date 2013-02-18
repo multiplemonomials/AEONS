@@ -48,6 +48,8 @@
 #define Z_MIN_PIN          17
 #define Z_MAX_PIN          16
 
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
 #define E_STEP_PIN         11
 #define E_DIR_PIN          12
 #define E_ENABLE_PIN       -1
@@ -126,6 +128,8 @@
 #define E_DIR_PIN          16
 #define E_ENABLE_PIN        3
 
+#define STEPPER_PULSE_WIDTH 2 //???
+
 #define SDPOWER          -1
 #define SDSS          -1
 #define LED_PIN             0
@@ -176,6 +180,8 @@
 #define E_STEP_PIN      17
 #define E_DIR_PIN       16
 #define E_ENABLE_PIN    -1
+
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 #define SDPOWER          -1
 #define SDSS          4
@@ -240,6 +246,8 @@
 #define E_DIR_PIN       21
 #define E_STEP_PIN	17
 #define E_ENABLE_PIN	13
+
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 //heaters
 
@@ -307,6 +315,9 @@
 #define E_STEP_PIN 12 
 #define E_DIR_PIN 17
 #define E_ENABLE_PIN 3
+
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
 #define HEATER_0_PIN 16
 #define TEMP_0_PIN 0
 
@@ -363,6 +374,8 @@
 #define E_DIR_PIN        21
 #define E_STEP_PIN	19
 #define E_ENABLE_PIN	24 //same as X/Y_enable_pin
+
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 //heaters
 
@@ -428,6 +441,8 @@
 	#define E_DIR_PIN          28
 	#define E_ENABLE_PIN       24
 
+	#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
 	#define E_1_STEP_PIN         36
 	#define E_1_DIR_PIN          34
 	#define E_1_ENABLE_PIN       30
@@ -480,6 +495,8 @@
 	#define E_DIR_PIN          34
 	#define E_ENABLE_PIN       30
 
+	#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
 	#define SDPOWER            48
 	#define SDSS               53
 	#define LED_PIN            13
@@ -524,6 +541,8 @@
 		#define E_STEP_PIN         32
 		#define E_DIR_PIN          34
 		#define E_ENABLE_PIN       30
+
+		#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 		#define SDPOWER            48
 		#define SDSS               53
@@ -580,6 +599,8 @@
 #define E_DIR_PIN          12
 #define E_ENABLE_PIN       -1
 
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
 #define SDPOWER          -1
 #define SDSS          -1
 #define LED_PIN            -1
@@ -630,6 +651,9 @@
     #define E_STEP_PIN      4     //Edited @ EJE Electronics 20100715
     #define E_DIR_PIN       2     //Edited @ EJE Electronics 20100715
     #define E_ENABLE_PIN    3     //Added @ EJE Electronics 20100715
+
+	#define STEPPER_PULSE_WIDTH 2 //Texas Instruments drivers/DRV8811 chips
+
     #define TEMP_0_PIN      5     //changed @ rkoeppl 20110410
     #define HEATER_0_PIN    14    //changed @ rkoeppl 20110410
     #define HEATER_1_PIN    -1    //changed @ rkoeppl 20110410
@@ -681,6 +705,8 @@
 
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
+
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 #define LED_PIN            -1
 
@@ -748,7 +774,7 @@
 #define E_DIR_PIN           7 
 #define E_ENABLE_PIN       19 
 
-
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 #define HEATER_0_PIN       21  // Extruder
 #define HEATER_1_PIN       20  // Bed
@@ -804,8 +830,7 @@
 #define E_STEP_PIN          6  
 #define E_DIR_PIN           7 
 
-
-
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 #define HEATER_0_PIN       4  // Extruder
 #define HEATER_1_PIN       4  // Bed
@@ -848,7 +873,7 @@
 #define E_STEP_PIN          6  
 #define E_DIR_PIN           7 
 
-
+#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
 
 #define HEATER_0_PIN       4  // Extruder
