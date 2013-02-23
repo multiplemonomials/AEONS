@@ -23,17 +23,16 @@
 #include "Thermometer.h"
 
  //software endstop settings:
- //Endstop pins are set to your board defaults.  If your endstop situation is different, you can change them here.
- //Set the pin to -1 if you don't have an endstop. 
- //#define X_MIN_PIN           3
- //#define X_MAX_PIN          -1
- 
- //	#define Y_MIN_PIN          14
- //	#define Y_MAX_PIN          -1
- 
- // #define Z_MIN_PIN          18
- // #define Z_MAX_PIN          -1
-	
+
+//#define MIN_SOFTWARE_ENDSTOPS //If uncommented, axis won't move to coordinates less than zero.
+#define MAX_SOFTRARE_ENDSTOPS //If true, axis won't move to coordinates greater than the defined lengths below.
+//Having both is legal but it may break homing with G28.
+
+//#define MAX_HARDWARE_ENDSTOPS //your endstops are mounted at the end of your axes
+#define MIN_HARDWARE_ENDSTOPS //your endstops are mounted at the start of your axes
+//using both at the same time is not supported
+
+
 //// Thermistor settings:
 // 0 is your own custom table (YOU MUST ENTER IN thermistortables.h!!!)
 // 1 is 100k thermistor
@@ -58,8 +57,8 @@
 //// ADVANCED SETTINGS - to tweak thermistor temps:
 #include "thermistortables.h"
 
-// For Inverting Stepper Enable Pins (Active Low) use 0 (e.g.polulu), Non Inverting (Active High) use 1
-#define ENABLE_PINS_INVERTING 0
+// For Inverting Stepper Enable Pins (Active Low) use 1 (e.g. polulu), Non Inverting (Active High) use 0
+#define ENABLE_PINS_INVERTING 1
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
@@ -93,7 +92,7 @@
 //set it to -1 to disable the fan
 //#define FAN_PIN -1
 //Uncomment one of the following lines to indicate how your fan is controlled
-//#define FAN_USES_PWM //PWM fan, from a PC.  CURRENTLY NOT SUPPORTED
+//#define FAN_USES_PWM //PWM fan.  CURRENTLY NOT SUPPORTED
 #define FAN_ON_OFF //Fan turned on by recieving power.
 
 //You can control debugging below the following line:
@@ -101,8 +100,8 @@
 #define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
 #define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
 #define DEBUG_MOVEMENT
-
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
+//#define ACTUALLY MOVE   //does the printer move when told to?
 
 //MOVEMENT SETTINGS
 #define X_STEPS_PER_MM 52.504
@@ -113,7 +112,7 @@
 //feedrate limits for axes--defaults should be OK for most people
 #define XY_AXES_MAX_FEEDRATE 18000
 #define Z_AXIS_MAX_FEEDRATE 100
-#define E_AXIS_MAX_FEEDRATE 18000
+#define E_AXIS_MAX_FEEDRATE 300
 
 //feedrates to use when sent a G28 Home All Axes
 #define XY_AXES_HOMING_FEEDRATE 1500
@@ -137,8 +136,6 @@
 #define INVERT_Z_DIR true
 #define INVERT_E_DIR false
 
-#define MIN_SOFTWARE_ENDSTOPS false //If true, axis won't move to coordinates less than zero.
-#define MAX_SOFTWARE_ENDSTOPS true  //If true, axis won't move to coordinates greater than the defined lengths below.
 #define X_MAX_LENGTH 186
 #define Y_MAX_LENGTH 231
 #define Z_MAX_LENGTH 110
@@ -159,6 +156,27 @@
 	#define HAS_POWER_SUPPLY
 #endif
 
-
+#ifdef MIN_HARDWARE_ENDSTOPS
+	#ifdef MAX_HARDWARE_ENDSTOPS
+		#error "You can't use minimum and maximum hardware endstops at the same time. Sorry."
+	#endif
 #endif
 
+#ifdef MIN_HARDWARE_ENDSTOPS
+	#define X_ENDSTOP_PIN X_MIN_PIN
+#else
+	#define X_ENDSTOP_PIN X_MAX_PIN
+#endif
+
+#ifdef MIN_HARDWARE_ENDSTOPS
+	#define Y_ENDSTOP_PIN Y_MIN_PIN
+#else
+	#define Y_ENDSTOP_PIN Y_MAX_PIN
+#endif
+
+#endif
+#ifdef MIN_HARDWARE_ENDSTOPS
+	#define Z_ENDSTOP_PIN Z_MIN_PIN
+#else
+	#define Z_ENDSTOP_PIN Z_MAX_PIN
+#endif

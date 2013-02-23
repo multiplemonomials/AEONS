@@ -233,6 +233,9 @@ code * gcode_factory()
 	if(n_value > 0)
 		verify(n_value);
 
+	//part of the gcode protocol
+	Serial.println("ok");
+
 	#ifdef DEBUG_GCODE_PARSING
 		Serial.print("Parsed gcode details:");
 		Serial.print("G-value: ");

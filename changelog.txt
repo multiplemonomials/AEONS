@@ -1,10 +1,10 @@
-/* Changelog/Features in v-0.5 ALPHA (as stable as an elephant on a seesaw...)
+/* Changelog/Features in v-0.4 ALPHA (as stable as an elephant on a seesaw...)
 
 *linear move algorithm FINALLY written
 
-*fixed G1 command call
+*added Pin object family
 
-*fixed some bugs
+*???
 
 v0.1 CHECKLIST:
 ----------------------------------------------------------------------
@@ -53,6 +53,12 @@ O Calculation of max feedrates needs to take angle into account. (?)
 O asserts.h: ASSERT2 is broken (needs verification)
 
 O Movement.cpp: Software endstops? What software endstops?
+
+O Change pinMode calls to use Pin objects
+
+O Change pins.h to fix compiler warnings by separating board and board version
+
+O AEONS:verify() needs to verify the code checksum as well as the line number
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
