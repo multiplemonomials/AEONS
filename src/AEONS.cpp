@@ -390,25 +390,6 @@ void init_pins()
     pinMode(E_DIR_PIN, OUTPUT);
   #endif
 
-  //Initialize Enable Pins - steppers default to disabled.
-
-  #if (X_ENABLE_PIN > -1)
-    pinMode(X_ENABLE_PIN, OUTPUT);
-  if(!ENABLE_PINS_INVERTING) digitalWrite(X_ENABLE_PIN,HIGH);
-  #endif
-  #if (Y_ENABLE_PIN > -1)
-    pinMode(Y_ENABLE_PIN, OUTPUT);
-  if(!ENABLE_PINS_INVERTING) digitalWrite(Y_ENABLE_PIN,HIGH);
-  #endif
-  #if (Z_ENABLE_PIN > -1)
-    pinMode(Z_ENABLE_PIN, OUTPUT);
-  if(!ENABLE_PINS_INVERTING) digitalWrite(Z_ENABLE_PIN,HIGH);
-  #endif
-  #if (E_ENABLE_PIN > -1)
-    pinMode(E_ENABLE_PIN, OUTPUT);
-  if(!ENABLE_PINS_INVERTING) digitalWrite(E_ENABLE_PIN,HIGH);
-  #endif
-
   //endstops and pullups
   #ifdef ENDSTOPPULLUPS
   #if X_MIN_PIN > -1

@@ -30,7 +30,7 @@ bool DigitalInputPin::isActive()
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-DigitalOutputPin::DigitalOutputPin(Pin pin_number, int pulse_duration,  bool active_high)
+DigitalOutputPin::DigitalOutputPin(Pin pin_number, uint16_t pulse_duration,  bool active_high)
 {
 	_pin_number = pin_number; //the pin to work with
 	_pulse_duration = pulse_duration; //if pulse() is called, how long in microseconds to wait?
@@ -40,7 +40,7 @@ DigitalOutputPin::DigitalOutputPin(Pin pin_number, int pulse_duration,  bool act
 	digitalWrite(_pin_number, active_high ? LOW : HIGH);
 
 	//delayMicroseconds will die horribly if called with more than 16383
-	ASSERT(_pulse_duration < 16383)
+	ASSERT2(_pulse_duration < 16383, _pulse_duration);
 }
 
 void DigitalOutputPin::setActive()
@@ -56,7 +56,8 @@ void DigitalOutputPin::setInactive()
 void DigitalOutputPin::pulse()
 {
 	digitalWrite(_pin_number, _active_high ? HIGH : LOW); //turn on
-	delayMicroseconds(_pulse_duration);
+	millis();
+	//delayMicroseconds(_pulse_duration);
 	digitalWrite(_pin_number, _active_high ? LOW : HIGH); //turn off
 }
 
@@ -85,3 +86,9 @@ AnalogOutputPin::AnalogOutputPin(Pin pin_number)
 
 	pinMode(_pin_number, OUTPUT);
 }
+
+void AnalogOutputPin::set_value(uint8_t value)
+{
+	analogWrite(_pin_number, value);
+}
+

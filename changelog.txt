@@ -40,6 +40,8 @@ X Movement.cpp: use functors to fix the delay time floating point issues
 
 X Movement.cpp: Add a debug thing to measure the algorithm time
 
+X Movement.cpp: Software endstops? What software endstops?
+
 _______________________________________________________________________
 
 O Movemement.cpp: only enable axes when we need to and disable them after we're done
@@ -51,8 +53,6 @@ O Device.h: PWM fans unimplemented
 O Calculation of max feedrates needs to take angle into account. (?)
 
 O asserts.h: ASSERT2 is broken (needs verification)
-
-O Movement.cpp: Software endstops? What software endstops?
 
 O Change pinMode calls to use Pin objects
 

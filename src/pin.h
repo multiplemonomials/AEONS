@@ -48,7 +48,7 @@ class DigitalOutputPin
 
 public:
 	// Ctor.
-	DigitalOutputPin(Pin pin_number, int pulseDuration, bool active_high=true);
+	DigitalOutputPin(Pin pin_number, uint16_t pulseDuration, bool active_high=true);
 
 	// Set the pin output active.
 	void setActive();
@@ -88,7 +88,7 @@ public:
 	AnalogOutputPin(Pin pin_number);
 
 	// Set the pin output to between 0..255.
-	void set_value(short value);
+	void set_value(uint8_t value);
 };
 
 #endif /* PIN_H */

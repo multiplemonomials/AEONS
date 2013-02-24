@@ -27,7 +27,7 @@ Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, Pin endstop_pin, boo
 
 void Axis::set_positive_direction(bool positive_direction)
 {
-	//store the current direction for entstop testing
+	//store the current direction for endstop testing
 	_current_direction_positive = positive_direction;
 
 	if(positive_direction)
@@ -72,7 +72,7 @@ bool Axis::check_endstop_active()
 void Axis::step()
 {
 	#ifdef ACTUALLY_MOVE
-		if(!check_endstop_active)
+		if(!check_endstop_active())
 		{
 			_step_pin.pulse();
 		}

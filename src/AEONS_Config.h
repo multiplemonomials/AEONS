@@ -60,12 +60,6 @@
 // For Inverting Stepper Enable Pins (Active Low) use 1 (e.g. polulu), Non Inverting (Active High) use 0
 #define ENABLE_PINS_INVERTING 1
 
-//// ENDSTOP SETTINGS:
-// Sets direction of endstops when homing; 1=MAX, -1=MIN
-#define X_HOME_DIR -1
-#define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
-
 
 // The minimal temperature defines the temperature below which the heater will not be enabled.
 // Protects from open circuits.
@@ -101,7 +95,7 @@
 #define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
 #define DEBUG_MOVEMENT
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
-//#define ACTUALLY MOVE   //does the printer move when told to?
+#define ACTUALLY_MOVE   //does the printer move when told to?
 
 //MOVEMENT SETTINGS
 #define X_STEPS_PER_MM 52.504
