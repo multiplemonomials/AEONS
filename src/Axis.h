@@ -22,6 +22,8 @@ public:
 
 	bool _endstop_pin_inverting;
 	bool _has_endstop;
+	bool _current_direction_positive;
+	bool _endstop_at_MIN;
 
 private:
 	DigitalOutputPin _step_pin;
@@ -33,7 +35,7 @@ public:
 	float _max_feedrate;
 	float _homing_feedrate;
 
-	Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, Pin endstop_pin, bool direction_pin_inverting, bool endstop_pin_inverting, float steps_per_mm, float max_feedrate, float homing_feedrate, unsigned int step_delay);
+	Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, Pin endstop_pin, bool direction_pin_inverting, bool endstop_pin_inverting, bool endstop_at_MIN, float steps_per_mm, float max_feedrate, float homing_feedrate, unsigned int step_delay);
 
 	void set_positive_direction(bool positive_direction);
 

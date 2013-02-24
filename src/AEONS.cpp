@@ -153,6 +153,9 @@ void get_next_command(char * buffer, int buffer_length)
 
 	int counter = 0;
 
+	//request next command from host
+	Serial.println("ok");
+
 	do
 	{
 		buffer[counter] = Serial.read();
@@ -232,9 +235,6 @@ code * gcode_factory()
 
 	if(n_value > 0)
 		verify(n_value);
-
-	//part of the gcode protocol
-	Serial.println("ok");
 
 	#ifdef DEBUG_GCODE_PARSING
 		Serial.print("Parsed gcode details:");

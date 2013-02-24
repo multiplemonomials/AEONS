@@ -1,4 +1,4 @@
-/* Changelog/Features in v-0.4 ALPHA (as stable as an elephant on a seesaw...)
+/* Changelog/Features in v-0.4 ALPHA (Prototype X-1...)
 
 *linear move algorithm FINALLY written
 
@@ -16,7 +16,7 @@ X fix syntax highlighting for AEONS.cpp
 
 O step test code
 
-O Axis object
+X Axis object
 
 O inactivity timeout
 
@@ -58,7 +58,7 @@ O Change pinMode calls to use Pin objects
 
 O Change pins.h to fix compiler warnings by separating board and board version
 
-O AEONS:verify() needs to verify the code checksum as well as the line number
+O AEONS.cpp:verify() needs to verify the code checksum as well as the line number
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

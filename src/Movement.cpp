@@ -160,6 +160,27 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	#ifdef DEBUG_MOVEMENT
 		unsigned long start_millis = millis();
 	#endif
+
+	//-------------------------------------------------------------------------------
+	// Over-distance protection
+	// AKA software endstops
+	//-------------------------------------------------------------------------------
+	if(x_target > X_MAX_LENGTH)
+	{
+		x_target = X_MAX_LENGTH;
+	}
+
+	if(y_target > Y_MAX_LENGTH)
+	{
+		y_target = Y_MAX_LENGTH;
+	}
+
+	if(z_target > Z_MAX_LENGTH)
+	{
+		z_target = Z_MAX_LENGTH;
+	}
+
+
 	//-------------------------------------------------------------------------------
 	// if some moves are negative, set the axis to move in a negative direction,
 	// then convert to positive value.

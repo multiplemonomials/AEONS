@@ -5,7 +5,7 @@
 -----------------------------------------------------------------------------*/
 #include "Axis.h"
 
-Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, Pin endstop_pin, bool direction_pin_inverting, bool endstop_pin_inverting, float steps_per_mm, float max_feedrate, float homing_feedrate, unsigned int step_delay)
+Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, Pin endstop_pin, bool direction_pin_inverting, bool endstop_pin_inverting, bool endstop_at_MIN, float steps_per_mm, float max_feedrate, float homing_feedrate, unsigned int step_delay)
 :
 	_step_pin(step_pin, step_delay, true),
 	_enable_pin(enable_pin, 1, !ENABLE_PINS_INVERTING),
@@ -18,12 +18,18 @@ Axis::Axis(Pin step_pin, Pin direction_pin, Pin enable_pin, Pin endstop_pin, boo
 	_max_feedrate = max_feedrate;
 	_current_position = 0;
 	_endstop_pin_inverting = endstop_pin_inverting;
+	_endstop_at_MIN = endstop_at_MIN;
 
 	_has_endstop = (endstop_pin > 0);
+
+	_current_direction_positive = true;
 }
 
 void Axis::set_positive_direction(bool positive_direction)
 {
+	//store the current direction for entstop testing
+	_current_direction_positive = positive_direction;
+
 	if(positive_direction)
 	{
 		_direction_pin.setActive();
@@ -49,6 +55,10 @@ bool Axis::check_endstop_active()
 	if(!_has_endstop)
 	{
 		return false; //return false always if the pin is set to -1
+	}
+	else if(_current_direction_positive == _endstop_at_MIN )
+	{
+		return false; //ignore the endstop if we're moving away from it
 	}
 	else if(_endstop_pin_inverting)
 	{

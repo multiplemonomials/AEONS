@@ -220,7 +220,7 @@ M105::M105(char * command)
 void M105::process()
 {
 	#ifdef HAS_EXTRUDER
-		Serial.print("ok T:");
+		Serial.print("ok\n T:");
 		Serial.print(Printer::instance().Extruder.getTemperature()); 
 	#endif
 	#ifdef HAS_BED

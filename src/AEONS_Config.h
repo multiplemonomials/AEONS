@@ -157,6 +157,12 @@
 #endif
 
 #ifdef MIN_HARDWARE_ENDSTOPS
+	#define ENDSTOPS_AT_MIN true
+#else
+	#define ENDSTOPS_AT_MIN false
+#endif
+
+#ifdef MIN_HARDWARE_ENDSTOPS
 	#ifdef MAX_HARDWARE_ENDSTOPS
 		#error "You can't use minimum and maximum hardware endstops at the same time. Sorry."
 	#endif
