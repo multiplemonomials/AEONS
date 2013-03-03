@@ -20,12 +20,15 @@ public:
 	float _current_position;
 	float _steps_per_mm;
 
+private:
 	bool _endstop_pin_inverting;
 	bool _has_endstop;
 	bool _current_direction_positive;
 	bool _endstop_at_MIN;
+#ifdef DEBUG_ENDSTOPS
+	uint8_t _message_counter;
+#endif
 
-private:
 	DigitalOutputPin _step_pin;
 	DigitalOutputPin _enable_pin;
 	DigitalOutputPin _direction_pin;
@@ -46,7 +49,7 @@ public:
 	void step();
 
 private:
-	bool check_endstop_active();
+	bool cleared_to_move();
 
 public:
 	float getCurrentPosition() const

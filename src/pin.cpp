@@ -5,13 +5,13 @@
 -----------------------------------------------------------------------------*/
 #include "pin.h"
 
-DigitalInputPin::DigitalInputPin(Pin pin_number)
+DigitalInputPin::DigitalInputPin(Pin pin_number, bool enable_pullups)
 {
 	_pin_number = pin_number;
 
 	if(_pin_number > 0)
 	{
-		pinMode(_pin_number, INPUT);
+		pinMode(_pin_number, enable_pullups ? INPUT_PULLUP : INPUT);
 	}
 }
 
@@ -55,8 +55,10 @@ void DigitalOutputPin::setInactive()
 
 void DigitalOutputPin::pulse()
 {
+//	Serial.print("pulsing pin ");
+//	Serial.println(_pin_number);
+
 	digitalWrite(_pin_number, _active_high ? HIGH : LOW); //turn on
-	//millis();
 	delayMicroseconds(_pulse_duration);
 	digitalWrite(_pin_number, _active_high ? LOW : HIGH); //turn off
 }

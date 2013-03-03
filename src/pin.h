@@ -30,9 +30,9 @@ class DigitalInputPin
 
 public:
 	// Ctor.
-	DigitalInputPin(Pin pin_number);
+	DigitalInputPin(Pin pin_number, bool enable_pullups=true);
 
-	// Returns true if pin is in a high state. (NOT on drugs) (yes its a joke)
+	// Returns true if pin is in a high state.
 	bool isActive();
 };
 

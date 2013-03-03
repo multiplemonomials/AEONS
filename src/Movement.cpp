@@ -83,6 +83,7 @@ unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, uns
 	unsigned int LCM_of_z_and_e = (multiply_no_0(z_val, e_val)) / GCD(z_val, e_val); //1/1
 	unsigned int final_LCM 		= (multiply_no_0(LCM_of_x_and_y, LCM_of_z_and_e)) / GCD(LCM_of_x_and_y, LCM_of_z_and_e);
 
+#if 0
 	Serial.println("LCM: ");
 	Serial.println(LCM_of_x_and_y);
 	Serial.println(LCM_of_z_and_e);
@@ -92,6 +93,7 @@ unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, uns
 	Serial.println("GCD: ");
 	Serial.print(GCD(x_val, y_val));
 	Serial.println("END");
+#endif
 
 	return final_LCM;
 
@@ -104,12 +106,12 @@ unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, uns
 -----------------------------------------------------------------------------*/
 void step_loop
 (
-	delay_base* delayer,
-	unsigned int loop_count,
-	StepCount x_steps_per_tick,
-	StepCount y_steps_per_tick,
-	StepCount z_steps_per_tick,
-	StepCount e_steps_per_tick
+	delay_base* 	delayer,
+	unsigned int 	loop_count,
+	StepCount 		x_steps_per_tick,
+	StepCount 		y_steps_per_tick,
+	StepCount 		z_steps_per_tick,
+	StepCount 		e_steps_per_tick
 )
 {
 	StepCount x_steps_counter = x_steps_per_tick;
@@ -119,25 +121,25 @@ void step_loop
 
 	for(int tick_counter = loop_count; tick_counter > 0; tick_counter--)
 	{
-		if(x_steps_counter-- != 0)
+		if(--x_steps_counter == 0)
 		{
 			Printer::instance().x_axis.step();
 			x_steps_counter = x_steps_per_tick;
 		}
 
-		if(y_steps_counter-- != 0)
+		if(--y_steps_counter == 0)
 		{
 			Printer::instance().y_axis.step();
 			y_steps_counter = y_steps_per_tick;
 		}
 
-		if(z_steps_counter-- != 0)
+		if(--z_steps_counter == 0)
 		{
 			Printer::instance().z_axis.step();
 			z_steps_counter = z_steps_per_tick;
 		}
 
-		if(e_steps_counter-- != 0)
+		if(--e_steps_counter == 0)
 		{
 			Printer::instance().e_axis.step();
 			e_steps_counter = e_steps_per_tick;
@@ -365,13 +367,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	float move_time_in_ms				= move_distance_in_mm / feedrate_mm_per_millisecond;
 	float time_in_ms_per_loop			= move_time_in_ms / loops_to_do;
 
-//	unsigned long x_delay_per_step = delay_millisecond_per_mm / Printer::instance().x_axis._steps_per_mm;
-//	unsigned long y_delay_per_step = delay_millisecond_per_mm / Printer::instance().y_axis._steps_per_mm;
-//	unsigned long z_delay_per_step= delay_millisecond_per_mm / Printer::instance().z_axis._steps_per_mm;
-//	unsigned long e_delay_per_step = delay_millisecond_per_mm / Printer::instance().e_axis._steps_per_mm;
-//	unsigned long delay_per_loop = (total_x_steps * x_delay_per_step) + (total_y_steps)
-
-
 //	void step_loop(unsigned int loops_to_do, unsigned int ticks_per_loop, unsigned int x_steps_per_tick, unsigned int y_steps_per_tick, unsigned int z_steps_per_tick,
 //			unsigned int e_steps_per_tick, unsigned long delay_per_x_step, unsigned long delay_per_y_step, unsigned long delay_per_z_step, unsigned long delay_per_e_step)
 
@@ -396,8 +391,8 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 		DISPLAY_IT(e_interval);
 		DISPLAY_IT(move_time_in_ms);
 		DISPLAY_IT(move_distance_in_mm);
-		Serial.println("Calculation took: ");
-		DISPLAY_IT(calculation_time_millisconds);
+		Serial.print("Calculation took: ");
+		Serial.println(calculation_time_millisconds);
 		#undef DISPLAY_IT
 	#endif
 
@@ -415,4 +410,12 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 		Serial.print(millis() - start_millis);
 		Serial.println("milliseconds");
 	#endif
+
+	//-------------------------------------------------------------------------------
+	// Disable Axes
+	//-------------------------------------------------------------------------------
+	Printer::instance().x_axis.disable();
+	Printer::instance().y_axis.disable();
+	Printer::instance().z_axis.disable();
+	Printer::instance().e_axis.disable();
 }

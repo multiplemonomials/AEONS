@@ -94,10 +94,11 @@
 // Comment these out (using // at the start of the line)
 //#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
 #define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
-#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
+//#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
 #define DEBUG_MOVEMENT       //debug movement calculation
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
 #define ACTUALLY_MOVE   //does the printer move when told to?
+//#define DEBUG_ENDSTOPS  //why won't that axis move?
 
 //MOVEMENT SETTINGS
 #define X_STEPS_PER_MM 52.504
