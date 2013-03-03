@@ -3,21 +3,28 @@
 
 // BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 
-//// The following define selects which electronics board you have. Please choose the one that matches your setup
-// Gen 3 Plus = 21
-// gen 3  Monolithic Electronics = 22
-// Gen3 PLUS for TechZone Gen3 Remix Motherboard = 23
-// RAMPS 1.0 = 30
-// RAMPS 1.1/1.2  = 31
-// RAMPS 1.3/1.4 = 33
+// The following define selects which electronics board you have. Please choose the one that matches your setup
+// custom pin assignment in pins.h = 0
+// RepRap Motherboard = 1
+// Gen3 = not supported, sorry
+// RAMPS = 3
 // Gen6 = 5
-// Gen7 1.2 = 72
-// Gen7 1.3 - 1.4 = 73
-// Sanguinololu up to 1.1 = 6
-// Sanguinololu 1.2 and above = 62
+// Gen7 1.2 = 7
+// Sanguinololu = 6
 // Teensylu (at90usb) = 8
 
-#define MOTHERBOARD 33
+#define MOTHERBOARD_MODEL 3
+
+// Now set your motherboard version:
+
+//0                                 |RAMPS 1.0, Gen6 1.0, teensylu, Reprap Motherboard
+//1									|RAMPS 1.1, Sanguinolulu 1.1, Gen3
+//2									|RAMPS 1.2, Sanguinolulu 1.2, Gen7 1.2
+//3									|RAMPS 1.3, Gen7 1.3
+//4									|RAMPS 1.4, Gen7 1.4
+
+
+#define MOTHERBOARD_VERSION 3
 
 #include "pins.h"
 #include "Thermometer.h"
@@ -44,12 +51,6 @@
 // 7 is 100k Honeywell thermistor 135-104LAG-J01
 #define THERMISTORHEATER 1
 #define THERMISTORBED 1
-
-//// Endstop Settings
-#define ENDSTOPPULLUPS // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
-// The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
-//If your axes are only moving in one direction, make sure the endstops are connected properly.
-
 
 // This determines the communication speed of the printer
 #define BAUDRATE 115200
@@ -90,10 +91,11 @@
 #define FAN_ON_OFF //Fan turned on by recieving power.
 
 //You can control debugging below the following line:
+// Comment these out (using // at the start of the line)
 //#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
 #define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
 #define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
-#define DEBUG_MOVEMENT
+#define DEBUG_MOVEMENT       //debug movement calculation
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
 #define ACTUALLY_MOVE   //does the printer move when told to?
 
@@ -112,6 +114,8 @@
 #define XY_AXES_HOMING_FEEDRATE 1500
 #define ZE_AXES_HOMING_FEEDRATE 75
 
+//// Endstop Settings
+//If your axes are only moving in one direction, make sure the endstops are connected properly.
 
 //If your axes move in one direction ONLY when the endstops are triggered, set [XYZ]_ENDSTOP_INVERT to true here:
 #define X_ENDSTOP_INVERT true

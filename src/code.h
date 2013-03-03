@@ -11,12 +11,9 @@
 -----------------------------------------------------------------------------*/
 struct code
 {
-	virtual void process();
+	virtual void process(){}
 
-//	virtual ~code()
-//	{
-//
-//	}
+	virtual ~code() {}
 };
 
 #endif

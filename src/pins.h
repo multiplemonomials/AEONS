@@ -1,3 +1,4 @@
+
 #ifndef PINS_H
 #define PINS_H
 #define ALARM_PIN          -1
@@ -23,12 +24,8 @@
 *       (D 8) PB0 14|    |15  PB1 (D 9)  PWM
 *                   +----+
 ****************************************************************************************/
-#if MOTHERBOARD == 0
+#if MOTHERBOARD_MODEL == 0
 #define KNOWN_BOARD 1
-
-#ifndef __AVR_ATmega168__
-#error Oops!  Make sure you have 'Arduino Diecimila' selected from the boards menu.
-#endif
 
 #define X_STEP_PIN          2
 #define X_DIR_PIN           3
@@ -54,8 +51,6 @@
 #define E_DIR_PIN          12
 #define E_ENABLE_PIN       -1
 
-#define SDPOWER          -1
-#define SDSS          -1
 #define LED_PIN            -1
 #define FAN_PIN            -1
 #define PS_ON_PIN          15
@@ -99,11 +94,11 @@
 *                        +--------+
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 1
+#if MOTHERBOARD_MODEL == 1 &&(MOTHERBOARD_VERSION == 1 || MOTHERBOARD_VERSION == 2)
 #define KNOWN_BOARD 1
 
 #if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega1284P__) 
-#error Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu.
+#error "Oops!  Make sure you have 'Sanguino' selected from the 'Tools -> Boards' menu."
 #endif
 
 #define X_STEP_PIN         15
@@ -152,7 +147,7 @@
 * RepRap Motherboard  ****---NOOOOOO RS485/EXTRUDER CONTROLLER!!!!!!!!!!!!!!!!!---*******
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 2
+#if MOTHERBOARD_MODEL == 2
 #define KNOWN_BOARD 1
 
 #if !defined(__AVR_ATmega644P__) && !defined(__AVR_ATmega1284P__) 
@@ -214,7 +209,7 @@
 * Gen3 PLUS for RepRap Motherboard V1.2
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 21
+#if (MOTHERBOARD_MODEL == 2) && (MOTHERBOARD_VERSION == 1)
 #define KNOWN_BOARD 1
 
 #ifndef __AVR_ATmega644P__
@@ -280,7 +275,7 @@
 * Gen3  Monolithic Electronics 
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 22
+#if MOTHERBOARD_MODEL == 2 && MOTHERBOARD_VERSION == 2
 #define KNOWN_BOARD 1
 
 #ifndef __AVR_ATmega644P__
@@ -342,7 +337,7 @@
 * Gen3 PLUS for TechZone Gen3 Remix Motherboard
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 23
+#if MOTHERBOARD_MODEL == 2 && MOTHERBOARD_VERSION == 3
 #define KNOWN_BOARD 1
 
 #ifndef __AVR_ATmega644P__
@@ -409,33 +404,135 @@
 * Arduino Mega/RAMPS pin assignment
 *
 ****************************************************************************************/
+#if MOTHERBOARD_MODEL == 3 &&(MOTHERBOARD_VERSION == 1 || MOTHERBOARD_VERSION == 2)
+	#define KNOWN_BOARD 1
 
-#if MOTHERBOARD == 33
 	#ifndef __AVR_ATmega1280__
 	 #ifndef __AVR_ATmega2560__
 	 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
 	 #endif
 	#endif
 
+	#define X_STEP_PIN		26
+	#define X_DIR_PIN 		28
+	#define X_ENABLE_PIN 	24
+	#define X_MIN_PIN 		 3
+	#define X_MAX_PIN 		 2
 
-	#define RAMPS_V_1_3
+	#define Y_STEP_PIN 		38
+	#define Y_DIR_PIN 		40
+	#define Y_MIN_PIN 		16
+	#define Y_MAX_PIN 		17
+	#define Y_ENABLE_PIN 	36
+
+	#define Z_STEP_PIN 		44
+	#define Z_DIR_PIN 		46
+	#define Z_MIN_PIN 		18
+	#define Z_MAX_PIN 		19
+	#define Z_ENABLE_PIN 	42
+
+	#define E_STEP_PIN      32
+	#define E_DIR_PIN       34
+	#define E_ENABLE_PIN    30
+
+	#define E2_STEP_PIN		23
+	#define E2_DIR_PIN 		25
+	#define E2_ENABLE_PIN	27
+
+	#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
+	#define LED_PIN            13
+	#define PS_ON_PIN          12
+	#define KILL_PIN           -1
+	#define ALARM_PIN          -1
+	#define FAN_PIN            9
+
+	#define HEATER_0_PIN  		10
+	#define HEATER_1_PIN  	   	 8
+	#define HEATER_2_PIN 	   	 9
+	#define TEMP_2_PIN 			 8  //temp_2 = second extruder // -1 in 1.0
+	#define TEMP_1_PIN 			 1
+	#define TEMP_0_PIN           2   // ANALOG NUMBERING
+	#define FAN_PIN   			 9
+
+#endif
+
+//                    RAMPS 1.0
+#if MOTHERBOARD_MODEL == 3 && MOTHERBOARD_VERSION == 0
+	#define KNOWN_BOARD 1
+
+	#ifndef __AVR_ATmega1280__
+	 #ifndef __AVR_ATmega2560__
+	 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+	 #endif
+	#endif
+
+	#define X_STEP_PIN		26
+	#define X_DIR_PIN 		28
+	#define X_ENABLE_PIN 	24
+	#define X_MIN_PIN 		 3
+	#define X_MAX_PIN 		 2
+
+	#define Y_STEP_PIN 		38
+	#define Y_DIR_PIN 		40
+	#define Y_MIN_PIN 		16
+	#define Y_MAX_PIN 		17
+	#define Y_ENABLE_PIN 	36
+
+	#define Z_STEP_PIN 		44
+	#define Z_DIR_PIN 		46
+	#define Z_MIN_PIN 		18
+	#define Z_MAX_PIN 		19
+	#define Z_ENABLE_PIN 	42
+
+	#define E_STEP_PIN      32
+	#define E_DIR_PIN       34
+	#define E_ENABLE_PIN    30
+
+	#define E2_STEP_PIN		-1
+	#define E2_DIR_PIN 		-1
+	#define E2_ENABLE_PIN	-1
+
+	#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+
+	#define LED_PIN            13
+	#define PS_ON_PIN          -1
+	#define KILL_PIN           -1
+	#define ALARM_PIN          -1
+	#define FAN_PIN            -1
+
+	#define HEATER_0_PIN  		10
+	#define HEATER_1_PIN  	   	-1
+	#define HEATER_2_PIN 	   	-1
+	#define TEMP_2_PIN 			-1  //temp_2 = second extruder
+	#define TEMP_1_PIN 			-1
+	#define TEMP_0_PIN          12   // ANALOG NUMBERING
+	#define FAN_PIN   			9
+
+#endif
+
+#if MOTHERBOARD_MODEL == 3 && MOTHERBOARD_VERSION == 3
+	#if (!defined(__AVR_ATmega1280__)) && (!defined(__AVR_ATmega2560__))
+	 	 #error "Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu."
+	#endif
+
 	#define X_STEP_PIN         54
 	#define X_DIR_PIN          55
 	#define X_ENABLE_PIN       38
 	#define X_MIN_PIN           3
-	#define X_MAX_PIN          -1
+	#define X_MAX_PIN           2
 
 	#define Y_STEP_PIN         60
 	#define Y_DIR_PIN          61
 	#define Y_ENABLE_PIN       56
 	#define Y_MIN_PIN          14
-	#define Y_MAX_PIN          -1   //15
+	#define Y_MAX_PIN          15   //15
 
 	#define Z_STEP_PIN         46
 	#define Z_DIR_PIN          48
 	#define Z_ENABLE_PIN       62
 	#define Z_MIN_PIN          18
-	#define Z_MAX_PIN          -1   //19
+	#define Z_MAX_PIN          19
 
 	#define E_STEP_PIN         26
 	#define E_DIR_PIN          28
@@ -456,121 +553,21 @@
 	#define ALARM_PIN          -1
 
 	#define HEATER_0_PIN       10
-	#define HEATER_1_PIN       8
+	#define HEATER_1_PIN        8
+	#define HEATER_2_PIN		9
 	#define TEMP_0_PIN         13   // ANALOG NUMBERING
 	#define TEMP_1_PIN         14   // ANALOG NUMBERING
 	#define TEMP_2_PIN         15   // ANALOG NUMBERING
 	#define KNOWN_BOARD 1
-	#endif
 
-	
-#if MOTHERBOARD == 30
-	#define KNOWN_BOARD 1
-		
-	#ifndef __AVR_ATmega1280__
-	 #ifndef __AVR_ATmega2560__
-	 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
-	 #endif
-	#endif
-
-	#define X_STEP_PIN         26
-	#define X_DIR_PIN          28
-	#define X_ENABLE_PIN       24
-	#define X_MIN_PIN           3
-	#define X_MAX_PIN          -1    //2
-
-	#define Y_STEP_PIN         38
-	#define Y_DIR_PIN          40
-	#define Y_ENABLE_PIN       36
-	#define Y_MIN_PIN          16
-	#define Y_MAX_PIN          -1    //17
-
-	#define Z_STEP_PIN         44
-	#define Z_DIR_PIN          46
-	#define Z_ENABLE_PIN       42
-	#define Z_MIN_PIN          18
-	#define Z_MAX_PIN          -1    //19
-
-	#define E_STEP_PIN         32
-	#define E_DIR_PIN          34
-	#define E_ENABLE_PIN       30
-
-	#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
-
-	#define SDPOWER            48
-	#define SDSS               53
-	#define LED_PIN            13
-	#define PS_ON_PIN          12
-	#define KILL_PIN           -1
-	#define ALARM_PIN          -1
-	#define FAN_PIN            9
-
-	#define HEATER_0_PIN  		12    // RAMPS 1.0
-	#define HEATER_1_PIN  	   	-1    // RAMPS 1.0
-	#define FAN_PIN   			11
-	
 #endif
-
-	#if MOTHERBOARD == 31 //RAMPS v1.1 or 1.2
-		#define KNOWN_BOARD 1
-			
-		#ifndef __AVR_ATmega1280__
-		 #ifndef __AVR_ATmega2560__
-		 #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
-		 #endif
-		#endif
-
-		#define X_STEP_PIN         26
-		#define X_DIR_PIN          28
-		#define X_ENABLE_PIN       24
-		#define X_MIN_PIN           3
-		#define X_MAX_PIN          -1    //2
-
-		#define Y_STEP_PIN         38
-		#define Y_DIR_PIN          40
-		#define Y_ENABLE_PIN       36
-		#define Y_MIN_PIN          16
-		#define Y_MAX_PIN          -1    //17
-
-		#define Z_STEP_PIN         44
-		#define Z_DIR_PIN          46
-		#define Z_ENABLE_PIN       42
-		#define Z_MIN_PIN          18
-		#define Z_MAX_PIN          -1    //19
-
-		#define E_STEP_PIN         32
-		#define E_DIR_PIN          34
-		#define E_ENABLE_PIN       30
-
-		#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
-
-		#define SDPOWER            48
-		#define SDSS               53
-		#define LED_PIN            13
-		#define PS_ON_PIN          12
-		#define KILL_PIN           -1
-		#define ALARM_PIN          -1
-		#define FAN_PIN            9
-
-		#define HEATER_0_PIN     10    // RAMPS 1.1
-		#define HEATER_1_PIN      8    // RAMPS 1.1
-		#define FAN_PIN           9    // RAMPS 1.1
-	
-
-		#define TEMP_0_PIN          2    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-		#define TEMP_1_PIN          1    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-
 	// SPI for Max6675 Thermocouple 
 	  #define MAX6675_SS       49
-
-
-
-#endif
 /****************************************************************************************
 * Duemilanove w/ ATMega328P pin assignment
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 4
+#if MOTHERBOARD_MODEL == 4
 #define KNOWN_BOARD 1
 
 #ifndef __AVR_ATmega328P__
@@ -601,8 +598,6 @@
 
 #define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
-#define SDPOWER          -1
-#define SDSS          -1
 #define LED_PIN            -1
 #define FAN_PIN             5
 #define PS_ON_PIN          -1
@@ -658,9 +653,6 @@
     #define HEATER_0_PIN    14    //changed @ rkoeppl 20110410
     #define HEATER_1_PIN    -1    //changed @ rkoeppl 20110410
     
-    
-    #define SDPOWER          -1
-    #define SDSS          17
     #define LED_PIN         -1    //changed @ rkoeppl 20110410
     #define TEMP_1_PIN      -1    //changed @ rkoeppl 20110410
     #define FAN_PIN         -1    //changed @ rkoeppl 20110410

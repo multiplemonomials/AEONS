@@ -33,11 +33,11 @@ protected:
 
 public:
 
-	virtual void operator ()();
+	virtual void operator ()(){}
 
 	static delay_base* delay_factory(float delay_time);
 
-//	virtual ~delay_base(){}
+	virtual ~delay_base();
 };
 
 

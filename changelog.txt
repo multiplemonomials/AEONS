@@ -52,13 +52,15 @@ O Device.h: PWM fans unimplemented
 
 O Calculation of max feedrates needs to take angle into account. (?)
 
-O asserts.h: ASSERT2 is broken (needs verification)
-
 O Change pinMode calls to use Pin objects
 
 O Change pins.h to fix compiler warnings by separating board and board version
 
 O AEONS.cpp:verify() needs to verify the code checksum as well as the line number
+
+O possible future support for RS485 communications bus/Gen3 electronics
+
+O possibly create a set of extruder_controller objects so Gen3 support can be added
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

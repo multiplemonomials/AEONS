@@ -56,8 +56,8 @@ void DigitalOutputPin::setInactive()
 void DigitalOutputPin::pulse()
 {
 	digitalWrite(_pin_number, _active_high ? HIGH : LOW); //turn on
-	millis();
-	//delayMicroseconds(_pulse_duration);
+	//millis();
+	delayMicroseconds(_pulse_duration);
 	digitalWrite(_pin_number, _active_high ? LOW : HIGH); //turn off
 }
 

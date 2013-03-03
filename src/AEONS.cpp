@@ -84,9 +84,11 @@ long line_number = 0;
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 
+extern "C" void __cxa_pure_virtual() {}
 
 void setup()
 {
+
     // setup serial connection
 	Serial.begin(BAUDRATE);
 	Serial.println("start");
@@ -388,53 +390,6 @@ void init_pins()
   #endif
   #if E_DIR_PIN > -1
     pinMode(E_DIR_PIN, OUTPUT);
-  #endif
-
-  //endstops and pullups
-  #ifdef ENDSTOPPULLUPS
-  #if X_MIN_PIN > -1
-    pinMode(X_MIN_PIN, INPUT);
-    digitalWrite(X_MIN_PIN,HIGH);
-  #endif
-  #if X_MAX_PIN > -1
-    pinMode(X_MAX_PIN, INPUT);
-    digitalWrite(X_MAX_PIN,HIGH);
-  #endif
-  #if Y_MIN_PIN > -1
-    pinMode(Y_MIN_PIN, INPUT);
-    digitalWrite(Y_MIN_PIN,HIGH);
-  #endif
-  #if Y_MAX_PIN > -1
-    pinMode(Y_MAX_PIN, INPUT);
-    digitalWrite(Y_MAX_PIN,HIGH);
-  #endif
-  #if Z_MIN_PIN > -1
-    pinMode(Z_MIN_PIN, INPUT);
-    digitalWrite(Z_MIN_PIN,HIGH);
-  #endif
-  #if Z_MAX_PIN > -1
-    pinMode(Z_MAX_PIN, INPUT);
-    digitalWrite(Z_MAX_PIN,HIGH);
-  #endif
-  #else
-  #if X_MIN_PIN > -1
-    pinMode(X_MIN_PIN, INPUT);
-  #endif
-  #if X_MAX_PIN > -1
-    pinMode(X_MAX_PIN);
-  #endif
-  #if Y_MIN_PIN > -1
-    pinMode(Y_MIN_PIN, INPUT);
-  #endif
-  #if Y_MAX_PIN > -1
-    pinMode(Y_MAX_PIN, INPUT);
-  #endif
-  #if Z_MIN_PIN > -1
-    pinMode(Z_MIN_PIN, INPUT);
-  #endif
-  #if Z_MAX_PIN > -1
-    pinMode(Z_MAX_PIN, INPUT);
-  #endif
   #endif
 
   #if (HEATER_0_PIN > -1)

@@ -155,6 +155,17 @@ void step_loop
 void move(float x_target, float y_target, float z_target, float e_target, float feedrate)
 {
 	//-------------------------------------------------------------------------------
+	// Don't move at all if we didn't get any arguments
+	//-------------------------------------------------------------------------------
+	if(	x_target == 0 &&
+		y_target == 0 &&
+		z_target == 0 &&
+		e_target == 0)
+	{
+		return;
+	}
+
+	//-------------------------------------------------------------------------------
 	//	Debugging for measuring algorithm time
 	//-------------------------------------------------------------------------------
 	#ifdef DEBUG_MOVEMENT
@@ -165,22 +176,42 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	// Over-distance protection
 	// AKA software endstops
 	//-------------------------------------------------------------------------------
-	if(x_target > X_MAX_LENGTH)
-	{
-		x_target = X_MAX_LENGTH;
-	}
 
-	if(y_target > Y_MAX_LENGTH)
-	{
-		y_target = Y_MAX_LENGTH;
-	}
+	#ifdef MAX_SOFTRARE_ENDSTOPS
+		//maximum
+		if(x_target + Printer::instance().x_axis._current_position > X_MAX_LENGTH)
+		{
+			x_target =(float) X_MAX_LENGTH - Printer::instance().x_axis._current_position;
+		}
 
-	if(z_target > Z_MAX_LENGTH)
-	{
-		z_target = Z_MAX_LENGTH;
-	}
+		if(y_target + Printer::instance().y_axis._current_position > Y_MAX_LENGTH)
+		{
+			y_target =(float) Y_MAX_LENGTH - Printer::instance().x_axis._current_position;
+		}
 
+		if(z_target + Printer::instance().z_axis._current_position > Z_MAX_LENGTH)
+		{
+			z_target =(float) Z_MAX_LENGTH - Printer::instance().z_axis._current_position;
+		}
+	#endif
 
+		//minimum
+	#ifdef MIN_SOFTWARE_ENDSTOPS
+		if(x_target + Printer::instance().x_axis._current_position < 0)
+		{
+			x_target = 0.0 - Printer::instance().x_axis._current_position;
+		}
+
+		if(y_target + Printer::instance().y_axis._current_position < 0)
+		{
+			y_target = 0.0 - Printer::instance().x_axis._current_position;
+		}
+
+		if(z_target + Printer::instance().z_axis._current_position < 0)
+		{
+			z_target = 0.0 - Printer::instance().z_axis._current_position;
+		}
+	#endif
 	//-------------------------------------------------------------------------------
 	// if some moves are negative, set the axis to move in a negative direction,
 	// then convert to positive value.
@@ -196,17 +227,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 
 	Printer::instance().e_axis.set_positive_direction((e_target >= 0));
 	e_target = abs(e_target);
-
-	//-------------------------------------------------------------------------------
-	// Don't move at all if we didn't get any arguments
-	//-------------------------------------------------------------------------------
-	if(	x_target == 0 &&
-		y_target == 0 &&
-		z_target == 0 &&
-		e_target == 0)
-	{
-		return;
-	}
 
 	//-------------------------------------------------------------------------------
 	// Convert from mm to steps for each axis.
@@ -363,7 +383,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 		unsigned long calculation_time_millisconds = millis() - start_millis;
 
 		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.print(": "); Serial.println(__val)
-		DISPLAY_IT(calculation_time_millisconds);
 		Serial.println("Calling move function with parameters:");
 		DISPLAY_IT(time_in_ms_per_loop);
 		DISPLAY_IT(loops_to_do);
@@ -377,6 +396,8 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 		DISPLAY_IT(e_interval);
 		DISPLAY_IT(move_time_in_ms);
 		DISPLAY_IT(move_distance_in_mm);
+		Serial.println("Calculation took: ");
+		DISPLAY_IT(calculation_time_millisconds);
 		#undef DISPLAY_IT
 	#endif
 
