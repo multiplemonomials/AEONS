@@ -214,6 +214,15 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 			z_target = 0.0 - Printer::instance().z_axis._current_position;
 		}
 	#endif
+
+	//-------------------------------------------------------------------------------
+	// Update current position
+	// based on the distance we're being asked to move
+	//-------------------------------------------------------------------------------
+	Printer::instance().x_axis.setCurrentPosition(Printer::instance().x_axis.getCurrentPosition() + x_target);
+	Printer::instance().y_axis.setCurrentPosition(Printer::instance().y_axis.getCurrentPosition() + y_target);
+	Printer::instance().z_axis.setCurrentPosition(Printer::instance().z_axis.getCurrentPosition() + z_target);
+
 	//-------------------------------------------------------------------------------
 	// if some moves are negative, set the axis to move in a negative direction,
 	// then convert to positive value.
@@ -358,6 +367,14 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	}
 
 	//-------------------------------------------------------------------------------
+	// Update endstop direction so we don't have to do this while stepping
+	//-------------------------------------------------------------------------------
+	Printer::instance().x_axis.update_endstop_clearance();
+	Printer::instance().y_axis.update_endstop_clearance();
+	Printer::instance().z_axis.update_endstop_clearance();
+	Printer::instance().e_axis.update_endstop_clearance();
+
+	//-------------------------------------------------------------------------------
 	// Calculate delays from feedrate
 	//-------------------------------------------------------------------------------
 
@@ -366,9 +383,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	float feedrate_mm_per_millisecond 	= feedrate / (60.0 * 1000.0);
 	float move_time_in_ms				= move_distance_in_mm / feedrate_mm_per_millisecond;
 	float time_in_ms_per_loop			= move_time_in_ms / loops_to_do;
-
-//	void step_loop(unsigned int loops_to_do, unsigned int ticks_per_loop, unsigned int x_steps_per_tick, unsigned int y_steps_per_tick, unsigned int z_steps_per_tick,
-//			unsigned int e_steps_per_tick, unsigned long delay_per_x_step, unsigned long delay_per_y_step, unsigned long delay_per_z_step, unsigned long delay_per_e_step)
 
 	//-------------------------------------------------------------------------------
 	// Debug logging.

@@ -110,9 +110,9 @@ void Heater::manage_temperature()
 void Heater::check_temperature()
 {
 
-	if((_current < MINTEMP) || (_current > MAXTEMP))
+	if(((_current < MINTEMP) || (_current > MAXTEMP)) && (_target != 0))
 	{
-		Serial.println("!! Temperature out of bounds!  Cooling down...");
+		//Serial.println("!! Temperature out of bounds!  Cooling down...");
 		digitalWrite(_power_pin, LOW);
 		_target = 0;
 	}

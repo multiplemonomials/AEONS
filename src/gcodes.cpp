@@ -62,6 +62,19 @@ void G1::process()
 }
 
 /*-----------------------------------------------------------------------------
+G28 Home All
+-----------------------------------------------------------------------------*/
+G28::G28(char * command)
+{
+	// TBD
+}
+
+void G28::process()
+{
+	Printer::instance().relative_mode = false;
+}
+
+/*-----------------------------------------------------------------------------
 G90 Set absolute positioning
 -----------------------------------------------------------------------------*/
 G90::G90(char * command)
@@ -85,6 +98,42 @@ G91::G91(char * command)
 void G91::process()
 {
 	Printer::instance().relative_mode = true;
+}
+
+/*-----------------------------------------------------------------------------
+G92 Set position
+-----------------------------------------------------------------------------*/
+G92::G92(char * command)
+{
+	//read arguments from command
+	has_x_value = get_value_from_char_array_bool(command, 'X', &x_value);
+	has_y_value = get_value_from_char_array_bool(command, 'Y', &y_value);
+	has_z_value = get_value_from_char_array_bool(command, 'Z', &z_value);
+	has_e_value = get_value_from_char_array_bool(command, 'E', &e_value);
+}
+
+void G92::process()
+{
+	if(has_x_value)
+	{
+		Printer::instance().x_axis.setCurrentPosition(x_value);
+	}
+
+	if(has_y_value)
+	{
+		Printer::instance().y_axis.setCurrentPosition(y_value);
+	}
+
+	if(has_z_value)
+	{
+		Printer::instance().z_axis.setCurrentPosition(z_value);
+	}
+
+	if(has_e_value)
+	{
+		Printer::instance().e_axis.setCurrentPosition(e_value);
+	}
+
 }
 
 /*-----------------------------------------------------------------------------

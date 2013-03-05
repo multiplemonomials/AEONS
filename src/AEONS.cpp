@@ -209,14 +209,10 @@ code * gcode_factory()
 	fix_comments(Printer::instance().command);
 
 	//next part sets variables to attributes of the recieved code
-	bool has_g_value = false;
-		//cast here should be OK since mcodes and gcodes are never decimals
-	int g_value =(int) get_value_from_char_array(Printer::instance().command, 'G');
-
-	if(get_value_from_char_array(Printer::instance().command, 'G') != 0.0)
-	{
-		has_g_value = true;
-	}
+	//cast here should be OK since mcodes and gcodes are never decimals
+	float g_value_temp_float;
+	bool has_g_value = get_value_from_char_array_bool(Printer::instance().command, 'G', &g_value_temp_float);
+	int g_value = (int) g_value_temp_float;
 
 	bool has_m_value;
 	int m_value = (int)get_value_from_char_array(Printer::instance().command, 'M');
@@ -263,6 +259,9 @@ code * gcode_factory()
 				break;
 			case 91:
 				return new G91(Printer::instance().command);
+				break;
+			case 92:
+				return new G92(Printer::instance().command);
 				break;
 		}
 	}
@@ -335,8 +334,8 @@ double get_value_from_char_array(char * code, char target)
 
 /*-----------------------------------------------------------------------------
 	Returns false if the specified character is not found in the char[].
-	This one is used by functions where an argument of 0 is differet from
-	no argument at all, pretty much just G1.
+	This one is used by functions where an argument of 0 is different from
+	no argument at all, pretty much just G1 and G92.
 -----------------------------------------------------------------------------*/
 bool get_value_from_char_array_bool(char * code, char target, float * return_value)
 {
@@ -344,6 +343,7 @@ bool get_value_from_char_array_bool(char * code, char target, float * return_val
 
 	if (pointer_to_target == 0)
 	{
+		*return_value = 0;
 		return false;
 	}
 

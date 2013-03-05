@@ -25,6 +25,8 @@ private:
 	bool _has_endstop;
 	bool _current_direction_positive;
 	bool _endstop_at_MIN;
+	bool endstop_cleared_to_move;
+
 #ifdef DEBUG_ENDSTOPS
 	uint8_t _message_counter;
 #endif
@@ -47,6 +49,8 @@ public:
 	void disable();
 
 	void step();
+
+	void update_endstop_clearance();
 
 private:
 	bool cleared_to_move();
