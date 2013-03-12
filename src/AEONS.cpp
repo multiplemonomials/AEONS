@@ -112,7 +112,7 @@ void setup()
 -----------------------------------------------------------------------------*/
 void manage_temperatures()
 {
-	#ifdef HAS_EXTUDER
+	#ifdef HAS_EXTRUDER
 		Printer::instance().Extruder.manage_temperature();
 	#endif
 
