@@ -66,12 +66,39 @@ G28 Home All
 -----------------------------------------------------------------------------*/
 G28::G28(char * command)
 {
-	// TBD
+	_command =  command;
 }
 
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
 void G28::process()
 {
-	Printer::instance().relative_mode = false;
+	// If no argument supplied, home all axes.
+	if((!test_for_char(_command, 'X')) && (!test_for_char(_command, 'Y')) && (!test_for_char(_command, 'Z')))
+	{
+		Printer::instance().x_axis.home();
+		Printer::instance().y_axis.home();
+		Printer::instance().z_axis.home();
+		return;
+	}
+
+	// Home individual axes as requested.
+
+	if(test_for_char(_command, 'X'))
+	{
+		Printer::instance().x_axis.home();
+	}
+
+	if(test_for_char(_command, 'Y'))
+	{
+		Printer::instance().y_axis.home();
+	}
+
+	if(test_for_char(_command, 'Z'))
+	{
+		Printer::instance().z_axis.home();
+	}
 }
 
 /*-----------------------------------------------------------------------------

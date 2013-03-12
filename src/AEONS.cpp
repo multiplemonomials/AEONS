@@ -176,11 +176,21 @@ void get_next_command(char * buffer, int buffer_length)
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
-void verify(int n_value)
+void verify(int n_value, int checksum_from_command, char* command)
 {
+	int checksum = 0;
+	for(int counter = 0; command[counter] != '*' && command[counter] != NULL; counter++)
+		checksum = checksum ^ command[counter];
+	checksum &= 0xff;  // Defensive programming...
+
+	if((n_value == 0 && line_number != 0) || checksum_from_command == 0)
+	{
+		return; //the host does not support line checksums
+	}
+
 	if(n_value == line_number + 1)
 	{
-		line_number = n_value;
+		++line_number;
 		return;
 	}
 
@@ -232,7 +242,7 @@ code * gcode_factory()
 		Serial.println("Error! Neither a g-value or an m-value were recieved!");
 
 	if(n_value > 0)
-		verify(n_value);
+		verify(n_value, (int) get_value_from_char_array(Printer::instance().command, '*'), Printer::instance().command);
 
 	#ifdef DEBUG_GCODE_PARSING
 		Serial.print("Parsed gcode details:");
@@ -351,6 +361,16 @@ bool get_value_from_char_array_bool(char * code, char target, float * return_val
 	*return_value = static_cast<float>(strtod((pointer_to_target + 1), &end_ptr));
 
 	return true;
+}
+
+/*-----------------------------------------------------------------------------
+	Returns false if the specified character is not found in the char[].
+-----------------------------------------------------------------------------*/
+bool test_for_char(char * code, char target)
+{
+	char * pointer_to_target = strchr(code, target);
+
+	return pointer_to_target != 0;
 }
 
 /*-----------------------------------------------------------------------------

@@ -32,8 +32,7 @@
  //software endstop settings:
 
 //#define MIN_SOFTWARE_ENDSTOPS //If uncommented, axis won't move to coordinates less than zero.
-#define MAX_SOFTRARE_ENDSTOPS //If true, axis won't move to coordinates greater than the defined lengths below.
-//Having both is legal but it may break homing with G28.
+#define MAX_SOFTWARE_ENDSTOPS //If true, axis won't move to coordinates greater than the defined lengths below.
 
 //#define MAX_HARDWARE_ENDSTOPS //your endstops are mounted at the end of your axes
 #define MIN_HARDWARE_ENDSTOPS //your endstops are mounted at the start of your axes
@@ -123,6 +122,9 @@
 #define Y_ENDSTOP_INVERT true
 #define Z_ENDSTOP_INVERT true
 
+//check the endstop state while we're moving, or rely on software endstops?  May increase maximum speed.
+//#define ENDSTOP_CHECK_DURING_MOVE
+
 // Disables axis when it's not being used.
 #define DISABLE_X false
 #define DISABLE_Y false
@@ -155,10 +157,10 @@
 	#define HAS_POWER_SUPPLY
 #endif
 
-#ifdef MIN_HARDWARE_ENDSTOPS
-	#define ENDSTOPS_AT_MIN true
-#else
+#ifdef MAX_HARDWARE_ENDSTOPS
 	#define ENDSTOPS_AT_MIN false
+#else
+	#define ENDSTOPS_AT_MIN true
 #endif
 
 #ifdef MIN_HARDWARE_ENDSTOPS
@@ -184,4 +186,22 @@
 	#define Z_ENDSTOP_PIN Z_MIN_PIN
 #else
 	#define Z_ENDSTOP_PIN Z_MAX_PIN
+#endif
+
+//enable min software endstops if ENDSTOP_CHECK_DURING_MOVE is disabled
+#ifdef MIN_SOFTWARE_ENDSTOPS
+#ifndef MIN_HARDWARE_ENDSTOPS
+#ifndef ENDSTOP_CHECK_DURING_MOVE
+#define MIN_HARDWARE_ENDSTOPS
+#endif
+#endif
+#endif
+
+//vice versa
+#ifdef MAX_SOFTWARE_ENDSTOPS
+#ifndef MAX_HARDWARE_ENDSTOPS
+#ifndef ENDSTOP_CHECK_DURING_MOVE
+#define MAX_HARDWARE_ENDSTOPS
+#endif
+#endif
 #endif

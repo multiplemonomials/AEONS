@@ -179,7 +179,7 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	// AKA software endstops
 	//-------------------------------------------------------------------------------
 
-	#ifdef MAX_SOFTRARE_ENDSTOPS
+	#ifdef MAX_SOFTWARE_ENDSTOPS
 		//maximum
 		if(x_target + Printer::instance().x_axis._current_position > X_MAX_LENGTH)
 		{
@@ -214,14 +214,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 			z_target = 0.0 - Printer::instance().z_axis._current_position;
 		}
 	#endif
-
-	//-------------------------------------------------------------------------------
-	// Update current position
-	// based on the distance we're being asked to move
-	//-------------------------------------------------------------------------------
-	Printer::instance().x_axis.setCurrentPosition(Printer::instance().x_axis.getCurrentPosition() + x_target);
-	Printer::instance().y_axis.setCurrentPosition(Printer::instance().y_axis.getCurrentPosition() + y_target);
-	Printer::instance().z_axis.setCurrentPosition(Printer::instance().z_axis.getCurrentPosition() + z_target);
 
 	//-------------------------------------------------------------------------------
 	// if some moves are negative, set the axis to move in a negative direction,
@@ -403,6 +395,10 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 		DISPLAY_IT(y_interval);
 		DISPLAY_IT(z_interval);
 		DISPLAY_IT(e_interval);
+		DISPLAY_IT(x_target);
+		DISPLAY_IT(y_target);
+		DISPLAY_IT(z_target);
+		DISPLAY_IT(e_target);
 		DISPLAY_IT(move_time_in_ms);
 		DISPLAY_IT(move_distance_in_mm);
 		Serial.print("Calculation took: ");
@@ -415,6 +411,8 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 	//-------------------------------------------------------------------------------
 
 	step_loop(delay_base::delay_factory(time_in_ms_per_loop), loops_to_do, x_interval, y_interval, z_interval, e_interval);
+
+	post_move: //for the Axis goto statement
 
 	Printer::instance().last_feedrate = feedrate;
 

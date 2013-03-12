@@ -67,6 +67,8 @@ O Change built-in types to C types (uint8_t, etc)
 
 O Command buffer for G1 and G28
 
+O Unit test for verify()?
+
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A	actively

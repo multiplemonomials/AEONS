@@ -57,6 +57,22 @@ public:
 	virtual ~delay_milliseconds(){}
 };
 
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+class dummy_delayer : public delay_base
+{
+public:
+
+	// Ctor.  Implement the delay in mS.
+	dummy_delayer(float delay_time);
+
+	// Implement the specified delay.
+	void operator ()();
+
+	virtual ~dummy_delayer(){}
+};
+
 
 /*-----------------------------------------------------------------------------
 

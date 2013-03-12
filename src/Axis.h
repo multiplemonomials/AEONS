@@ -10,9 +10,21 @@
 #include "AEONS_Config.h"
 #include "Arduino.h"
 #include "pin.h"
+#include "delay.h"
 
 /*-----------------------------------------------------------------------------
-	Controls a movement axis
+	Controls a movement axis.
+
+	Responsibilities:
+		o Initializes axis hardware.
+		o Drives stepper motor pins for the axis.
+		o Provides homing function to set zero point of axis.
+		o Manages endstop hardware for the axis.
+		o Keeps current direction that step operations will move.
+		o Keeps axis properties:
+			o Homing feedrate
+			o Max feedrate.
+			o current axis position
 -----------------------------------------------------------------------------*/
 struct Axis
 {
@@ -26,10 +38,6 @@ private:
 	bool _current_direction_positive;
 	bool _endstop_at_MIN;
 	bool endstop_cleared_to_move;
-
-#ifdef DEBUG_ENDSTOPS
-	uint8_t _message_counter;
-#endif
 
 	DigitalOutputPin _step_pin;
 	DigitalOutputPin _enable_pin;
@@ -52,8 +60,10 @@ public:
 
 	void update_endstop_clearance();
 
+	void home();
+
 private:
-	bool cleared_to_move();
+	inline bool cleared_to_move();
 
 public:
 	float getCurrentPosition() const
