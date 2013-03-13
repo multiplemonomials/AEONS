@@ -12,7 +12,7 @@ void manage_temperatures();
 
 void get_next_command(char * buffer, int buffer_length);
 
-void verify(int n_value, int checksum_from_command, char* command);
+bool verify(int n_value, int checksum_from_command, char* command);
 
 double get_value_from_char_array(char * code, char target);
 
