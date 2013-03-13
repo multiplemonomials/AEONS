@@ -1,9 +1,9 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-// BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
+// BASIC SETTINGS: select your board type, thermistor type, and endstop type
 
-// The following define selects which electronics board you have. Please choose the one that matches your setup
+// The following selects which electronics board you have. Please choose the one that matches your setup
 // custom pin assignment in pins.h = 0
 // RepRap Motherboard = 1
 // Gen3 = not supported, sorry
@@ -57,18 +57,16 @@
 //// ADVANCED SETTINGS - to tweak thermistor temps:
 #include "thermistortables.h"
 
-// For Inverting Stepper Enable Pins (Active Low) use 1 (e.g. polulu), Non Inverting (Active High) use 0
-#define ENABLE_PINS_INVERTING 1
+//Temperature settings
+//-------------------------------------------------------------------------------------------------------------------------------------------
 
+// When temperature exceeds max temp, your heater will be switched off.
+// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor failure!
+#define MAXTEMP 260
 
 // The minimal temperature defines the temperature below which the heater will not be enabled.
 // Protects from open circuits.
 #define MINTEMP 5
-
-//// Experimental max temp
-// When temperature exceeds max temp, your heater will be switched off.
-// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor failure!
-#define MAXTEMP 260
 
 //temperature delta to prevent superfast heater oscilation
 #define TEMPDELTA 2
@@ -89,10 +87,13 @@
 //#define FAN_USES_PWM //PWM fan.  CURRENTLY NOT SUPPORTED
 #define FAN_ON_OFF //Fan turned on by recieving power.
 
+//Debugging Settings:
+//-------------------------------------------------------------------------------------------------------------------------------------------
+
 //You can control debugging below the following line:
 // Comment these out (using // at the start of the line)
 //#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
-#define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY ENSUE
+#define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY (or may not) ENSUE
 //#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
 #define DEBUG_MOVEMENT       //debug movement calculation
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
@@ -100,6 +101,21 @@
 //#define DEBUG_ENDSTOPS  //why won't that axis move?
 
 //MOVEMENT SETTINGS
+//-------------------------------------------------------------------------------------------------------------------------------------------
+
+// Inverting axis direction
+#define INVERT_X_DIR false
+#define INVERT_Y_DIR false
+#define INVERT_Z_DIR true
+#define INVERT_E_DIR false
+
+// For Inverting Stepper Enable Pins (Active Low) use 1 (e.g. polulu), Non Inverting (Active High) use 0
+#define ENABLE_PINS_INVERTING 1
+
+#define X_MAX_LENGTH 186
+#define Y_MAX_LENGTH 231
+#define Z_MAX_LENGTH 110
+
 #define X_STEPS_PER_MM 52.504
 #define Y_STEPS_PER_MM 26.523
 #define Z_STEPS_PER_MM 2267.567
@@ -116,30 +132,22 @@
 
 //// Endstop Settings
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
-
 //If your axes move in one direction ONLY when the endstops are triggered, set [XYZ]_ENDSTOP_INVERT to true here:
 #define X_ENDSTOP_INVERT true
 #define Y_ENDSTOP_INVERT true
 #define Z_ENDSTOP_INVERT true
 
+//optimization settings:
+//-------------------------------------------------------------------------------------------------------------------------------------------
 //check the endstop state while we're moving, or rely on software endstops?  May increase maximum speed.
 //#define ENDSTOP_CHECK_DURING_MOVE
 
-// Disables axis when it's not being used.
-#define DISABLE_X false
-#define DISABLE_Y false
-#define DISABLE_Z false
-#define DISABLE_E false
+//verify gcodes with a checksum if your host supports it (pronterface does not)
+//may give a speed improvement if disabled, leave on if not sure
+#define VERIFY_GCODES
 
-// Inverting axis direction
-#define INVERT_X_DIR false
-#define INVERT_Y_DIR false
-#define INVERT_Z_DIR true
-#define INVERT_E_DIR false
-
-#define X_MAX_LENGTH 186
-#define Y_MAX_LENGTH 231
-#define Z_MAX_LENGTH 110
+//User settings above this line, don't mess with stuff below
+//-------------------------------------------------------------------------------------------------------------------------------------------
 
 #if HEATER_0_PIN > -1
 	#define HAS_EXTRUDER

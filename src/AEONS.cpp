@@ -162,7 +162,7 @@ void get_next_command(char * buffer, int buffer_length)
 	{
 		buffer[counter] = Serial.read();
 		#ifdef DEBUG_GCODE_PARSING
-			Serial.print(buffer[counter]);
+			Serial.print(buffer[counter], " ");
 		#endif
 		//stop us going TOO fast and reading before we have any more characters to read
 		delay(2);
@@ -176,34 +176,30 @@ void get_next_command(char * buffer, int buffer_length)
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
-void verify(int n_value, int checksum_from_command, char* command)
+bool verify(int n_value, int checksum_from_command, char* command)
 {
 	int checksum = 0;
-	for(int counter = 0; command[counter] != '*' && command[counter] != NULL; counter++)
+	for(int counter = 0; command[counter] != '*' && command[counter] != 0; counter++)
 		checksum = checksum ^ command[counter];
 	checksum &= 0xff;  // Defensive programming...
 
 	if((n_value == 0 && line_number != 0) || checksum_from_command == 0)
 	{
-		return; //the host does not support line checksums
+		return true; //the host does not support line checksums
 	}
 
-	if(n_value == line_number + 1)
+	if(n_value == line_number + 1 && checksum_from_command == checksum)
 	{
 		++line_number;
-		return;
+		return true;
 	}
 
 	else
 	{
-		//update the curent line number
-		Serial.print("Supplied line number of ");
-		Serial.println(n_value);
-		Serial.print(" is not eqaual to ");
-		Serial.print(line_number);
-		Serial.println(" + 1.");
-		return;
-
+		Serial.print("rs"); //ask the host to resend the lost command
+		Serial.println(" ");
+		Serial.print(line_number + 1);
+		return false;
 	}
 }
 
@@ -224,34 +220,34 @@ code * gcode_factory()
 	bool has_g_value = get_value_from_char_array_bool(Printer::instance().command, 'G', &g_value_temp_float);
 	int g_value = (int) g_value_temp_float;
 
-	bool has_m_value;
-	int m_value = (int)get_value_from_char_array(Printer::instance().command, 'M');
-	if(m_value != 0.0)
-	{
-		has_m_value = true;
-	}
 
-	bool has_n_value;
+		bool has_m_value;
+		int m_value = (int)get_value_from_char_array(Printer::instance().command, 'M');
+		if(m_value != 0.0)
+		{
+			has_m_value = true;
+		}
+
+	#ifdef VERIFY_GCODES
 	int n_value = (int) get_value_from_char_array(Printer::instance().command, 'N');
-	if(get_value_from_char_array(Printer::instance().command, 'M') != 0.0)
-	{
-		has_n_value = true;
-	}
+	#endif
 
 	if(!(has_g_value || has_m_value))
 		Serial.println("Error! Neither a g-value or an m-value were recieved!");
 
-	if(n_value > 0)
-		verify(n_value, (int) get_value_from_char_array(Printer::instance().command, '*'), Printer::instance().command);
+	#ifdef VERIFY_GCODES
+		if(!verify(n_value, (int) get_value_from_char_array(Printer::instance().command, '*'), Printer::instance().command))
+		{
+			return NULL; //if we're here the gcode is corrupt
+		}
+	#endif
 
 	#ifdef DEBUG_GCODE_PARSING
 		Serial.print("Parsed gcode details:");
 		Serial.print("G-value: ");
 		Serial.println(g_value);
-		Serial.print("M-value");
-		Serial.println(m_value);
-		Serial.print("N-value: ");
-		Serial.println(n_value);
+		Serial.print("M-value: ");
+		Serial.println(M_value);
 	#endif
 
 	//Now we construct the correct Gcode object
@@ -262,7 +258,10 @@ code * gcode_factory()
 		{
 			case 0:
 			case 1:
-			return new G1(Printer::instance().command);
+				return new G1(Printer::instance().command);
+				break;
+			case 28:
+				return new G28(Printer::instance().command);
 				break;
 			case 90:
 				return new G90(Printer::instance().command);
