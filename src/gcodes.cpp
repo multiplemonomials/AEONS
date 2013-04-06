@@ -58,7 +58,14 @@ void G1::process()
 
 
 	//void move(float x_target, float y_target, float z_target, float e_target, int feedrate, bool absolute_mode)
-	move(x_value, y_value, z_value, e_value, f_value);
+//	move(x_value, y_value, z_value, e_value, f_value);
+
+	Movement movement(x_value, y_value, z_value, e_value, f_value);
+	if(movement.is_valid())
+	{
+		movement.calculate_values();
+		movement.execute();
+	}
 }
 
 /*-----------------------------------------------------------------------------

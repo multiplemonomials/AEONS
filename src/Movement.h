@@ -13,6 +13,99 @@
 #include "AEONS_Typedefs.h"
 #include "delay.h"
 
+class Movement
+{
+public:
+
+#ifdef DEBUG_MOVEMENT
+	unsigned long start_millis;
+#endif
+
+	float _x_target;
+	float _y_target;
+	float _z_target;
+	float _e_target;
+	float _feedrate;
+
+	StepCount _total_x_steps;
+	StepCount _total_y_steps;
+	StepCount _total_z_steps;
+	StepCount _total_e_steps;
+
+	uint16_t _proposed_x_feedrate;
+	uint16_t _proposed_y_feedrate;
+	uint16_t _proposed_z_feedrate;
+	uint16_t _proposed_e_feedrate;
+
+	StepCount _x_interval;
+	StepCount _y_interval;
+	StepCount _z_interval;
+	StepCount _e_interval;
+
+	uint16_t _loops_to_do;
+
+	int32_t _move_distance_in_mm;
+	float _feedrate_mm_per_millisecond;
+	float _move_time_in_ms;
+	float _time_in_ms_per_loop;
+
+	uint32_t _calculation_time_millisconds;
+
+	delay_base* _delayer;
+
+	StepCount _x_steps_counter;
+	StepCount _y_steps_counter;
+	StepCount _z_steps_counter;
+	StepCount _e_steps_counter;
+
+	Movement(float x_target, float y_target, float z_target, float e_target, float feedrate);
+
+	void calculate_values();
+
+	void execute();
+
+	bool is_valid();
+
+	void restrict_to_printable_area();
+
+	void absolute_valueize_direction();
+
+	void mm_to_steps();
+
+	// Enable movement for axes that need to move.
+	void enable_axes();
+
+	void limit_feedrates_to_maximums();
+
+	void calculate_movement_ratios();
+
+	void update_endstop_clearances();
+
+	void calculate_delays();
+
+	void print_debug_values();
+
+	static uint16_t LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val);
+
+	static uint16_t GCD(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val);
+
+	static uint16_t GCD(unsigned int x_val, unsigned int y_val);
+
+
+	/*-----------------------------------------------------------------------------
+	 	 Multiply operation that always returns a non-zero result, even
+	 	 if zero-valued arguments are provided.
+	-----------------------------------------------------------------------------*/
+	static int multiply_no_0(int value1, int value2);
+
+	void step_loop();
+
+	/*-----------------------------------------------------------------------------
+		Modulo operation with special case for zero-valued dividend.
+	-----------------------------------------------------------------------------*/
+	static int16_t modulo(int dividend, int divisor);
+};
+
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
@@ -31,24 +124,11 @@ unsigned int GCD(unsigned int x_val, unsigned int y_val);
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-void get_delay_from_feedrate(int x_val, int y_val, int z_val, int e_val, int feedrate);
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
 void move(float x_target, float y_target, float z_target, float e_target, float feedrate);
 
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-void step_loop
-(
-	delay_base* delayer,
-	unsigned int loop_count,
-	StepCount x_steps_per_tick,
-	StepCount y_steps_per_tick,
-	StepCount z_steps_per_tick,
-	StepCount e_steps_per_tick
-);
+void step_loop (delay_base* delayer, unsigned int loop_count, StepCount x_steps_per_tick, StepCount y_steps_per_tick, StepCount z_steps_per_tick, StepCount e_steps_per_tick);
 
 #endif

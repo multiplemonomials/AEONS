@@ -2,9 +2,336 @@
 #include "Assert.h"
 
 /*-----------------------------------------------------------------------------
+	Ctor
+-----------------------------------------------------------------------------*/
+Movement::Movement(float x_target, float y_target, float z_target, float e_target, float feedrate) :
+#ifdef DEBUG_MOVEMENT
+	start_millis(millis()),
+#endif
+
+	_x_target(x_target),
+	_y_target(y_target),
+	_z_target(z_target),
+	_e_target(e_target),
+	_feedrate(feedrate),
+
+	_total_x_steps(0),
+	_total_y_steps(0),
+	_total_z_steps(0),
+	_total_e_steps(0),
+
+	_proposed_x_feedrate(0),
+	_proposed_y_feedrate(0),
+	_proposed_z_feedrate(0),
+	_proposed_e_feedrate(0),
+
+	_x_interval(0),
+	_y_interval(0),
+	_z_interval(0),
+	_e_interval(0),
+
+	_loops_to_do(0),
+
+	_move_distance_in_mm(0),
+	_feedrate_mm_per_millisecond(0),
+	_move_time_in_ms(0),
+	_time_in_ms_per_loop(0),
+
+	_calculation_time_millisconds(0),
+
+	_delayer()
+
+{
+	// Further calculation deferred until calculate_values().
+}
+
+/*-----------------------------------------------------------------------------
+	calculate intervals and feedrates to prepare for move
+-----------------------------------------------------------------------------*/
+void Movement::calculate_values()
+{
+	// Truncate the move coordinates to be within the printer's printable area.
+	restrict_to_printable_area();
+
+	// If some moves are negative, set the axis to move in a negative direction,
+	// then convert to positive value.
+	absolute_valueize_direction();
+
+	mm_to_steps();
+
+	enable_axes();
+
+	limit_feedrates_to_maximums();
+
+	calculate_movement_ratios();
+
+	update_endstop_clearances();
+
+	calculate_delays();
+
+	print_debug_values();
+}
+
+//-------------------------------------------------------------------------------
+// Over-distance protection
+// AKA software endstops
+//-------------------------------------------------------------------------------
+void Movement::restrict_to_printable_area()
+{
+	#ifdef MAX_SOFTWARE_ENDSTOPS
+	//maximum
+	if(_x_target + Printer::instance().x_axis._current_position > X_MAX_LENGTH)
+	{
+		_x_target =(float) X_MAX_LENGTH - Printer::instance().x_axis._current_position;
+	}
+
+	if(_y_target + Printer::instance().y_axis._current_position > Y_MAX_LENGTH)
+	{
+		_y_target =(float) Y_MAX_LENGTH - Printer::instance().x_axis._current_position;
+	}
+
+	if(_z_target + Printer::instance().z_axis._current_position > Z_MAX_LENGTH)
+	{
+		_z_target =(float) Z_MAX_LENGTH - Printer::instance().z_axis._current_position;
+	}
+	#endif
+
+	//minimum
+	#ifdef MIN_SOFTWARE_ENDSTOPS
+	if(_x_target + Printer::instance().x_axis._current_position < 0)
+	{
+		_x_target = 0.0 - Printer::instance().x_axis._current_position;
+	}
+
+	if(_y_target + Printer::instance().y_axis._current_position < 0)
+	{
+		_y_target = 0.0 - Printer::instance().x_axis._current_position;
+	}
+
+	if(_z_target + Printer::instance().z_axis._current_position < 0)
+	{
+		_z_target = 0.0 - Printer::instance().z_axis._current_position;
+	}
+	#endif
+}
+
+//-------------------------------------------------------------------------------
+//  if some moves are negative, set the axis to move in a negative direction,
+// then convert to positive value.
+//-------------------------------------------------------------------------------
+void Movement::absolute_valueize_direction()
+{
+	Printer::instance().x_axis.set_positive_direction((_x_target >= 0));
+	_x_target = abs(_x_target);
+
+	Printer::instance().y_axis.set_positive_direction((_y_target >= 0));
+	_y_target = abs(_y_target);
+
+	Printer::instance().z_axis.set_positive_direction((_z_target >= 0));
+	_z_target = abs(_z_target);
+
+	Printer::instance().e_axis.set_positive_direction((_e_target >= 0));
+	_e_target = abs(_e_target);
+}
+
+//-------------------------------------------------------------------------------
+// Convert from mm to steps for each axis.
+//-------------------------------------------------------------------------------
+void Movement::mm_to_steps()
+{
+	_total_x_steps = _x_target * Printer::instance().x_axis._steps_per_mm;
+	_total_y_steps = _y_target * Printer::instance().y_axis._steps_per_mm;
+	_total_z_steps = _z_target * Printer::instance().z_axis._steps_per_mm;
+	_total_e_steps = _e_target * Printer::instance().e_axis._steps_per_mm;
+}
+
+//-------------------------------------------------------------------------------
+// Enable movement for axes that need to move.
+//-------------------------------------------------------------------------------
+void Movement::enable_axes()
+{
+	if(_total_x_steps != 0)
+	{
+		Printer::instance().x_axis.enable();
+	}
+
+	if(_total_y_steps != 0)
+	{
+		Printer::instance().y_axis.enable();
+	}
+
+	if(_total_z_steps != 0)
+	{
+		Printer::instance().z_axis.enable();
+	}
+
+	if(_total_e_steps != 0)
+	{
+		Printer::instance().e_axis.enable();
+	}
+}
+
+//-------------------------------------------------------------------------------
+// Make sure feedrates are within limits
+//-------------------------------------------------------------------------------
+void Movement::limit_feedrates_to_maximums()
+{
+	if(_feedrate > Printer::instance().x_axis._max_feedrate && !(_x_target == 0))
+	{
+	_proposed_x_feedrate = Printer::instance().x_axis._max_feedrate;
+	}
+	else
+	{
+	_proposed_x_feedrate = _feedrate;
+	}
+
+	if(_feedrate > Printer::instance().y_axis._max_feedrate && !(_y_target == 0))
+	{
+	_proposed_y_feedrate = Printer::instance().y_axis._max_feedrate;
+	}
+	else
+	{
+	_proposed_y_feedrate = _feedrate;
+	}
+
+	if(_feedrate > Printer::instance().z_axis._max_feedrate && !(_z_target == 0))
+	{
+	_proposed_z_feedrate = Printer::instance().z_axis._max_feedrate;
+	}
+	else
+	{
+	_proposed_z_feedrate = _feedrate;
+	}
+
+	if(_feedrate > Printer::instance().e_axis._max_feedrate && !(_e_target == 0))
+	{
+	_proposed_e_feedrate = Printer::instance().e_axis._max_feedrate;
+	}
+	else
+	{
+	_proposed_e_feedrate = _feedrate;
+	}
+
+
+	_feedrate = min(min(_proposed_x_feedrate, _proposed_y_feedrate), min(_proposed_z_feedrate, _proposed_e_feedrate));
+}
+
+//-------------------------------------------------------------------------------
+// Calculate loops per tick and axis steps per loop
+//-------------------------------------------------------------------------------
+void Movement::calculate_movement_ratios()
+{
+	_loops_to_do = LCM(_total_x_steps, _total_y_steps, _total_z_steps, _total_e_steps);
+
+	_x_interval = (_total_x_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_x_steps);
+	_y_interval = (_total_y_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_y_steps);
+	_z_interval = (_total_z_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_z_steps);
+	_e_interval = (_total_e_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_e_steps);
+}
+
+//-------------------------------------------------------------------------------
+// Update endstop direction so we don't have to do this while stepping
+//-------------------------------------------------------------------------------
+void Movement::update_endstop_clearances()
+{
+	//don't need to do this if we aren't checking endstops during moves
+	#ifdef ENDSTOP_CHECK_DURING_MOVE
+		Printer::instance().x_axis.update_endstop_clearance();
+		Printer::instance().y_axis.update_endstop_clearance();
+		Printer::instance().z_axis.update_endstop_clearance();
+		Printer::instance().e_axis.update_endstop_clearance();
+	#endif
+}
+
+
+//-------------------------------------------------------------------------------
+// Calculate delays from feedrate
+//-------------------------------------------------------------------------------
+void Movement::calculate_delays()
+{
+	// Calculate delay per mm of movement to achieve the stated feed rate.
+	_move_distance_in_mm 			= _x_target + _y_target + _z_target + _e_target;
+	_feedrate_mm_per_millisecond 	= _feedrate / (60.0 * 1000.0);
+	_move_time_in_ms				= _move_distance_in_mm / _feedrate_mm_per_millisecond;
+	_time_in_ms_per_loop			= _move_time_in_ms / _loops_to_do;
+
+	_delayer 						= delay_base::delay_factory(_time_in_ms_per_loop);
+}
+
+
+//-------------------------------------------------------------------------------
+// Debug logging.
+//-------------------------------------------------------------------------------
+void Movement::print_debug_values()
+{
+	#ifdef DEBUG_MOVEMENT
+		unsigned long calculation_time_millisconds = millis() - start_millis;
+
+		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.print(": "); Serial.println(__val)
+		Serial.println("Calling move function with parameters:");
+		DISPLAY_IT(_time_in_ms_per_loop);
+		DISPLAY_IT(_loops_to_do);
+		DISPLAY_IT(_total_x_steps);
+		DISPLAY_IT(_total_y_steps);
+		DISPLAY_IT(_total_z_steps);
+		DISPLAY_IT(_total_e_steps);
+		DISPLAY_IT(_x_interval);
+		DISPLAY_IT(_y_interval);
+		DISPLAY_IT(_z_interval);
+		DISPLAY_IT(_e_interval);
+		DISPLAY_IT(_x_target);
+		DISPLAY_IT(_y_target);
+		DISPLAY_IT(_z_target);
+		DISPLAY_IT(_e_target);
+		DISPLAY_IT(_move_time_in_ms);
+		DISPLAY_IT(_move_distance_in_mm);
+		Serial.print("Calculation took: ");
+		Serial.println(calculation_time_millisconds);
+		#undef DISPLAY_IT
+	#endif
+}
+
+/*-----------------------------------------------------------------------------
+	Call the final function!!
+-----------------------------------------------------------------------------*/
+void Movement::execute()
+{
+	step_loop();
+
+	delete _delayer;
+
+	Printer::instance().last_feedrate = _feedrate;
+
+	#ifdef DEBUG_MOVEMENT
+	Serial.println("Finished Move!");
+	Serial.print("Move took ");
+	Serial.print(millis() - start_millis);
+	Serial.println("milliseconds");
+	#endif
+
+	#ifdef DISABLE_AXES_AFTER_MOVE
+		//-------------------------------------------------------------------------------
+		// Disable Axes
+		//-------------------------------------------------------------------------------
+		Printer::instance().x_axis.disable();
+		Printer::instance().y_axis.disable();
+		Printer::instance().z_axis.disable();
+		Printer::instance().e_axis.disable();
+	#endif
+}
+
+//-------------------------------------------------------------------------------
+// Returns false if the movement is invalid, e.g., X0 Y0 Z0 E0
+//-------------------------------------------------------------------------------
+bool Movement::is_valid()
+{
+	return(!(_x_target == 0 && _y_target == 0 && _z_target == 0 && _e_target == 0));
+}
+
+/*-----------------------------------------------------------------------------
 	Modulo operation with special case for zero-valued dividend.
 -----------------------------------------------------------------------------*/
-int modulo(int dividend, int divisor)
+int16_t Movement::modulo(int dividend, int divisor)
 {
 	return (dividend == 0) ? 0 : dividend % divisor;
 }
@@ -13,7 +340,7 @@ int modulo(int dividend, int divisor)
  	 Multiply operation that always returns a non-zero result, even
  	 if zero-valued arguments arte provided.
 -----------------------------------------------------------------------------*/
-int multiply_no_0(int value1, int value2)
+int Movement::multiply_no_0(int value1, int value2)
 {
 	if(value1 == 0)
 	{
@@ -33,7 +360,7 @@ int multiply_no_0(int value1, int value2)
 	Greatest Common Divisor.  Returns the largest value that all arguments
 	can be divided by leaving no remainder.
 -----------------------------------------------------------------------------*/
-unsigned int GCD(unsigned int x_val, unsigned int y_val)
+uint16_t Movement::GCD(unsigned int x_val, unsigned int y_val)
 {
 	if (x_val == 0 && y_val == 0)
 		{
@@ -73,7 +400,7 @@ unsigned int GCD(unsigned int x_val, unsigned int y_val)
 	Least Common Multiple.  The smallest positive integer that is divisible by
 	all supplied arguments. Zero arguments don't count.
 -----------------------------------------------------------------------------*/
-unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val)
+uint16_t Movement::LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, unsigned int e_val)
 {
 	// Algorithm check.
 	//ASSERT( (multiply_no_0(x_val, y_val) % GCD(x_val, y_val)) == 0);
@@ -104,330 +431,38 @@ unsigned int LCM(unsigned int x_val, unsigned int y_val, unsigned int z_val, uns
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-void step_loop
-(
-	delay_base* 	delayer,
-	unsigned int 	loop_count,
-	StepCount 		x_steps_per_tick,
-	StepCount 		y_steps_per_tick,
-	StepCount 		z_steps_per_tick,
-	StepCount 		e_steps_per_tick
-)
-{
-	StepCount x_steps_counter = x_steps_per_tick;
-	StepCount y_steps_counter = y_steps_per_tick;
-	StepCount z_steps_counter = z_steps_per_tick;
-	StepCount e_steps_counter = e_steps_per_tick;
+void Movement::step_loop()
 
-	for(int tick_counter = loop_count; tick_counter > 0; tick_counter--)
+{
+	_x_steps_counter = _x_interval;
+
+	for(int tick_counter = _loops_to_do; tick_counter > 0; tick_counter--)
 	{
-		if(--x_steps_counter == 0)
+		if(--_x_steps_counter == 0)
 		{
 			Printer::instance().x_axis.step();
-			x_steps_counter = x_steps_per_tick;
+			_x_steps_counter = _x_interval;
 		}
 
-		if(--y_steps_counter == 0)
+		if(--_y_steps_counter == 0)
 		{
 			Printer::instance().y_axis.step();
-			y_steps_counter = y_steps_per_tick;
+			_y_steps_counter = _y_interval;
 		}
 
-		if(--z_steps_counter == 0)
+		if(--_z_steps_counter == 0)
 		{
 			Printer::instance().z_axis.step();
-			z_steps_counter = z_steps_per_tick;
+			_z_steps_counter = _z_interval;
 		}
 
-		if(--e_steps_counter == 0)
+		if(--_e_steps_counter == 0)
 		{
 			Printer::instance().e_axis.step();
-			e_steps_counter = e_steps_per_tick;
+			_e_steps_counter = _e_interval;
 		}
 
-		(*delayer)();
+		(*_delayer)();
 	}
 
-	delete delayer;
-}
-
-/*-----------------------------------------------------------------------------
-
------------------------------------------------------------------------------*/
-void move(float x_target, float y_target, float z_target, float e_target, float feedrate)
-{
-	//-------------------------------------------------------------------------------
-	// Don't move at all if we didn't get any arguments
-	//-------------------------------------------------------------------------------
-	if(	x_target == 0 &&
-		y_target == 0 &&
-		z_target == 0 &&
-		e_target == 0)
-	{
-		return;
-	}
-
-	//-------------------------------------------------------------------------------
-	//	Debugging for measuring algorithm time
-	//-------------------------------------------------------------------------------
-	#ifdef DEBUG_MOVEMENT
-		unsigned long start_millis = millis();
-	#endif
-
-	//-------------------------------------------------------------------------------
-	// Over-distance protection
-	// AKA software endstops
-	//-------------------------------------------------------------------------------
-
-	#ifdef MAX_SOFTWARE_ENDSTOPS
-		//maximum
-		if(x_target + Printer::instance().x_axis._current_position > X_MAX_LENGTH)
-		{
-			x_target =(float) X_MAX_LENGTH - Printer::instance().x_axis._current_position;
-		}
-
-		if(y_target + Printer::instance().y_axis._current_position > Y_MAX_LENGTH)
-		{
-			y_target =(float) Y_MAX_LENGTH - Printer::instance().x_axis._current_position;
-		}
-
-		if(z_target + Printer::instance().z_axis._current_position > Z_MAX_LENGTH)
-		{
-			z_target =(float) Z_MAX_LENGTH - Printer::instance().z_axis._current_position;
-		}
-	#endif
-
-		//minimum
-	#ifdef MIN_SOFTWARE_ENDSTOPS
-		if(x_target + Printer::instance().x_axis._current_position < 0)
-		{
-			x_target = 0.0 - Printer::instance().x_axis._current_position;
-		}
-
-		if(y_target + Printer::instance().y_axis._current_position < 0)
-		{
-			y_target = 0.0 - Printer::instance().x_axis._current_position;
-		}
-
-		if(z_target + Printer::instance().z_axis._current_position < 0)
-		{
-			z_target = 0.0 - Printer::instance().z_axis._current_position;
-		}
-	#endif
-
-	//-------------------------------------------------------------------------------
-	// if some moves are negative, set the axis to move in a negative direction,
-	// then convert to positive value.
-	//-------------------------------------------------------------------------------
-	Printer::instance().x_axis.set_positive_direction((x_target >= 0));
-	x_target = abs(x_target);
-
-	Printer::instance().y_axis.set_positive_direction((y_target >= 0));
-	y_target = abs(y_target);
-
-	Printer::instance().z_axis.set_positive_direction((z_target >= 0));
-	z_target = abs(z_target);
-
-	Printer::instance().e_axis.set_positive_direction((e_target >= 0));
-	e_target = abs(e_target);
-
-	//-------------------------------------------------------------------------------
-	// Convert from mm to steps for each axis.
-	//-------------------------------------------------------------------------------
-	StepCount total_x_steps = x_target * Printer::instance().x_axis._steps_per_mm;
-	StepCount total_y_steps = y_target * Printer::instance().y_axis._steps_per_mm;
-	StepCount total_z_steps = z_target * Printer::instance().z_axis._steps_per_mm;
-	StepCount total_e_steps = e_target * Printer::instance().e_axis._steps_per_mm;
-
-	//-------------------------------------------------------------------------------
-	// Enable Axes
-	//-------------------------------------------------------------------------------
-	if(total_x_steps != 0)
-	{
-		Printer::instance().x_axis.enable();
-	}
-
-	if(total_y_steps != 0)
-	{
-		Printer::instance().y_axis.enable();
-	}
-
-	if(total_z_steps != 0)
-	{
-		Printer::instance().z_axis.enable();
-	}
-
-	if(total_e_steps != 0)
-	{
-		Printer::instance().e_axis.enable();
-	}
-
-	//-------------------------------------------------------------------------------
-	// Make sure feedrates are within limits
-	//-------------------------------------------------------------------------------
-	{
-		int proposed_x_feedrate;
-		int proposed_y_feedrate;
-		int proposed_z_feedrate;
-		int proposed_e_feedrate;
-
-		if(feedrate > Printer::instance().x_axis._max_feedrate && !(x_target == 0))
-		{
-			proposed_x_feedrate = Printer::instance().x_axis._max_feedrate;
-		}
-		else
-		{
-			proposed_x_feedrate = feedrate;
-		}
-
-		if(feedrate > Printer::instance().y_axis._max_feedrate && !(y_target == 0))
-		{
-			proposed_y_feedrate = Printer::instance().y_axis._max_feedrate;
-		}
-		else
-		{
-			proposed_y_feedrate = feedrate;
-		}
-
-		if(feedrate > Printer::instance().z_axis._max_feedrate && !(z_target == 0))
-		{
-			proposed_z_feedrate = Printer::instance().z_axis._max_feedrate;
-		}
-		else
-		{
-			proposed_z_feedrate = feedrate;
-		}
-
-		if(feedrate > Printer::instance().e_axis._max_feedrate && !(e_target == 0))
-		{
-			proposed_e_feedrate = Printer::instance().e_axis._max_feedrate;
-		}
-		else
-		{
-			proposed_e_feedrate = feedrate;
-		}
-
-
-		feedrate = min(min(proposed_x_feedrate, proposed_y_feedrate), min(proposed_z_feedrate, proposed_e_feedrate));
-	}
-
-
-	//-------------------------------------------------------------------------------
-	// Calculate loops per tick and axis steps per loop
-	//-------------------------------------------------------------------------------
-	unsigned int loops_to_do = LCM(total_x_steps, total_y_steps, total_z_steps, total_e_steps);
-
-	StepCount x_interval;
-	StepCount y_interval;
-	StepCount z_interval;
-	StepCount e_interval;
-
-	if(total_x_steps == 0)
-	{
-		x_interval = loops_to_do + 1;
-	}
-	else
-	{
-		x_interval = loops_to_do / total_x_steps;
-	}
-
-	if(total_y_steps == 0)
-	{
-		y_interval = loops_to_do + 1;
-	}
-	else
-	{
-		y_interval = loops_to_do / total_y_steps;
-	}
-
-	if(total_z_steps == 0)
-	{
-		z_interval = loops_to_do + 1;
-	}
-	else
-	{
-		z_interval = loops_to_do / total_z_steps;
-	}
-
-	if(total_e_steps == 0)
-	{
-		e_interval = loops_to_do + 1;
-	}
-	else
-	{
-		e_interval = loops_to_do / total_e_steps;
-	}
-
-	//-------------------------------------------------------------------------------
-	// Update endstop direction so we don't have to do this while stepping
-	//-------------------------------------------------------------------------------
-	Printer::instance().x_axis.update_endstop_clearance();
-	Printer::instance().y_axis.update_endstop_clearance();
-	Printer::instance().z_axis.update_endstop_clearance();
-	Printer::instance().e_axis.update_endstop_clearance();
-
-	//-------------------------------------------------------------------------------
-	// Calculate delays from feedrate
-	//-------------------------------------------------------------------------------
-
-	// Calculate delay per mm of movement to achieve the stated feed rate.
-	long move_distance_in_mm            = x_target + y_target + z_target + e_target;
-	float feedrate_mm_per_millisecond 	= feedrate / (60.0 * 1000.0);
-	float move_time_in_ms				= move_distance_in_mm / feedrate_mm_per_millisecond;
-	float time_in_ms_per_loop			= move_time_in_ms / loops_to_do;
-
-	//-------------------------------------------------------------------------------
-	// Debug logging.
-	//-------------------------------------------------------------------------------
-
-	#ifdef DEBUG_MOVEMENT
-		unsigned long calculation_time_millisconds = millis() - start_millis;
-
-		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.print(": "); Serial.println(__val)
-		Serial.println("Calling move function with parameters:");
-		DISPLAY_IT(time_in_ms_per_loop);
-		DISPLAY_IT(loops_to_do);
-		DISPLAY_IT(total_x_steps);
-		DISPLAY_IT(total_y_steps);
-		DISPLAY_IT(total_z_steps);
-		DISPLAY_IT(total_e_steps);
-		DISPLAY_IT(x_interval);
-		DISPLAY_IT(y_interval);
-		DISPLAY_IT(z_interval);
-		DISPLAY_IT(e_interval);
-		DISPLAY_IT(x_target);
-		DISPLAY_IT(y_target);
-		DISPLAY_IT(z_target);
-		DISPLAY_IT(e_target);
-		DISPLAY_IT(move_time_in_ms);
-		DISPLAY_IT(move_distance_in_mm);
-		Serial.print("Calculation took: ");
-		Serial.println(calculation_time_millisconds);
-		#undef DISPLAY_IT
-	#endif
-
-	//-------------------------------------------------------------------------------
-	// Call the final function!!
-	//-------------------------------------------------------------------------------
-
-	step_loop(delay_base::delay_factory(time_in_ms_per_loop), loops_to_do, x_interval, y_interval, z_interval, e_interval);
-
-	post_move: //for the Axis goto statement
-
-	Printer::instance().last_feedrate = feedrate;
-
-	#ifdef DEBUG_MOVEMENT
-		Serial.println("Finished Move!");
-		Serial.print("Move took ");
-		Serial.print(millis() - start_millis);
-		Serial.println("milliseconds");
-	#endif
-
-	//-------------------------------------------------------------------------------
-	// Disable Axes
-	//-------------------------------------------------------------------------------
-	Printer::instance().x_axis.disable();
-	Printer::instance().y_axis.disable();
-	Printer::instance().z_axis.disable();
-	Printer::instance().e_axis.disable();
 }

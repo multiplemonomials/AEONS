@@ -8,13 +8,15 @@
                                        ...because C++ isn't quite so bad after all.
 
 
-	Implemented Codes
-	-------------------
+Implemented Codes
+-------------------
 	Gcode:
 	G0  -> G1
 	G1  - Coordinated Movement X Y Z E
+	G28 - Home all Axis
 	G90 - Use Absolute Coordinates
 	G91 - Use Relative Coordinates
+	G92 - Set assumed position to cordinates given
 
 	Official RepRap M-Codes:
 	M40 - Eject printed object (user specified commands)
@@ -30,30 +32,29 @@
 	M116 - Wait for extuder AND bed to heat up
 
 
-	To Be Implemented
-	-------------------
-	 G4  - Dwell S<seconds> or P<milliseconds>
-	 G28 - Home all Axis
-	 G92 - Set assumed position to cordinates given
+To Be Implemented
+-------------------
+	G4  - Dwell S<seconds> or P<milliseconds>
 
 	RepRap M Codes
 
-	 M109 - Wait for extruder current temp to reach target temp.
-	 M114 - Display current position
+	M109 - Wait for extruder current temp to reach target temp.
+	M114 - Display current position
 
 	Custom M Codes
 
-	 M42 - Set output on free pins, on a non pwm pin (over pin 13 on an arduino mega) use S255 to turn it on and S0 to turn it off.
-	  	  Use P to decide the pin (M42 P23 S255) would turn pin 23 on
-	 M82  - Set E codes absolute (default)
-	 M83  - Set E codes relative while in Absolute Coordinates (G90) mode
-	 M84  - Disable steppers until next move,
+	M42 - Set output on free pins, on a non pwm pin (over pin 13 on an arduino mega) use S255 to turn it on and S0 to turn it off.
+		  Use P to decide the pin (M42 P23 S255) would turn pin 23 on
+	M84  - Disable steppers until next move,
 			or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
-	 M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-	 M92  - Set axis_steps_per_unit - same syntax as G92
-	 M115 - Capabilities string
-	 M190 - Wait for bed current temp to reach target temp.
+	M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
+	M92  - Set axis_steps_per_unit - same syntax as G92
+	M115 - Capabilities string
+	M190 - Wait for bed current temp to reach target temp.
 
+	Dual Extruder Support
+
+	Tx - change extruder to x (starts at extruder)
 
 	 By MultipleMonomials and ChatterComa, thx to Kliment
 -----------------------------------------------------------------------------*/

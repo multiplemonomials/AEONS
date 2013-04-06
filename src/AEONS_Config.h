@@ -144,7 +144,11 @@
 
 //verify gcodes with a checksum if your host supports it (pronterface does not)
 //may give a speed improvement if disabled, leave on if not sure
-#define VERIFY_GCODES
+//#define VERIFY_GCODES
+
+//disable axes after each move
+//recommended to leave disabled
+//#define DISABLE_AXES_AFTER_MOVE
 
 //User settings above this line, don't mess with stuff below
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -197,19 +201,11 @@
 #endif
 
 //enable min software endstops if ENDSTOP_CHECK_DURING_MOVE is disabled
-#ifdef MIN_SOFTWARE_ENDSTOPS
-#ifndef MIN_HARDWARE_ENDSTOPS
 #ifndef ENDSTOP_CHECK_DURING_MOVE
-#define MIN_HARDWARE_ENDSTOPS
+#ifndef MIN_SOFTWARE_ENDSTOPS
+#define MIN_SOFTWARE_ENDSTOPS
 #endif
-#endif
-#endif
-
-//vice versa
-#ifdef MAX_SOFTWARE_ENDSTOPS
 #ifndef MAX_HARDWARE_ENDSTOPS
-#ifndef ENDSTOP_CHECK_DURING_MOVE
 #define MAX_HARDWARE_ENDSTOPS
-#endif
 #endif
 #endif
