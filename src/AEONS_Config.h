@@ -13,7 +13,7 @@
 // Sanguinololu = 6
 // Teensylu (at90usb) = 8
 
-#define MOTHERBOARD_MODEL 3
+#define MOTHERBOARD_MODEL 0
 
 // Now set your motherboard version:
 

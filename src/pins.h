@@ -4,62 +4,58 @@
 #define ALARM_PIN          -1
 
 /****************************************************************************************
-* Arduino pin assignment
-*
-*                  ATMega168
-*                   +-\/-+
-*             PC6  1|    |28  PC5 (AI 5 / D19)
-*       (D 0) PD0  2|    |27  PC4 (AI 4 / D18)
-*       (D 1) PD1  3|    |26  PC3 (AI 3 / D17)
-*       (D 2) PD2  4|    |25  PC2 (AI 2 / D16)
-*  PWM+ (D 3) PD3  5|    |24  PC1 (AI 1 / D15)
-*       (D 4) PD4  6|    |23  PC0 (AI 0 / D14)
-*             VCC  7|    |22  GND
-*             GND  8|    |21  AREF
-*             PB6  9|    |20  AVCC
-*             PB7 10|    |19  PB5 (D 13)
-*  PWM+ (D 5) PD5 11|    |18  PB4 (D 12)
-*  PWM+ (D 6) PD6 12|    |17  PB3 (D 11) PWM
-*       (D 7) PD7 13|    |16  PB2 (D 10) PWM
-*       (D 8) PB0 14|    |15  PB1 (D 9)  PWM
-*                   +----+
+* Custom pin assignment
 ****************************************************************************************/
 #if MOTHERBOARD_MODEL == 0
-#define KNOWN_BOARD 1
+	#if (!defined(__AVR_ATmega1280__)) && (!defined(__AVR_ATmega2560__))
+	 	 #error "Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu."
+	#endif
 
-#define X_STEP_PIN          2
-#define X_DIR_PIN           3
-#define X_ENABLE_PIN       -1
-#define X_MIN_PIN           4
-#define X_MAX_PIN           9
+	//the RAMPS board I'm using has a bad Y socket so I use the E2 socket to drive the Y axis
 
-#define Y_STEP_PIN         10
-#define Y_DIR_PIN           7
-#define Y_ENABLE_PIN       -1
-#define Y_MIN_PIN           8
-#define Y_MAX_PIN          13
+	#define X_STEP_PIN         54
+	#define X_DIR_PIN          55
+	#define X_ENABLE_PIN       38
+	#define X_MIN_PIN           3
+	#define X_MAX_PIN           2
 
-#define Z_STEP_PIN         19
-#define Z_DIR_PIN          18
-#define Z_ENABLE_PIN        5
-#define Z_MIN_PIN          17
-#define Z_MAX_PIN          16
+	#define Y_STEP_PIN         36
+	#define Y_DIR_PIN          34
+	#define Y_ENABLE_PIN       30
+	#define Y_MIN_PIN          14
+	#define Y_MAX_PIN          15   //15
 
-#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
+	#define Z_STEP_PIN         46
+	#define Z_DIR_PIN          48
+	#define Z_ENABLE_PIN       62
+	#define Z_MIN_PIN          18
+	#define Z_MAX_PIN          19
 
-#define E_STEP_PIN         11
-#define E_DIR_PIN          12
-#define E_ENABLE_PIN       -1
+	#define E_STEP_PIN         26
+	#define E_DIR_PIN          28
+	#define E_ENABLE_PIN       24
 
-#define LED_PIN            -1
-#define FAN_PIN            -1
-#define PS_ON_PIN          15
-#define KILL_PIN           -1
-#define ALARM_PIN          -1
+	#define STEPPER_PULSE_WIDTH 2 //Polulu drivers/Allego A4899 chips
 
-#define HEATER_0_PIN        6
-#define TEMP_0_PIN          0    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+	#define E_1_STEP_PIN         60
+	#define E_1_DIR_PIN          61
+	#define E_1_ENABLE_PIN       56
 
+	#define SDPOWER            -1
+	#define SDSS               53
+	#define LED_PIN            13
+	#define FAN_PIN            9
+	#define PS_ON_PIN          12
+	#define KILL_PIN           -1
+	#define ALARM_PIN          -1
+
+	#define HEATER_0_PIN       10
+	#define HEATER_1_PIN        8
+	#define HEATER_2_PIN		9
+	#define TEMP_0_PIN         13   // ANALOG NUMBERING
+	#define TEMP_1_PIN         14   // ANALOG NUMBERING
+	#define TEMP_2_PIN         15   // ANALOG NUMBERING
+	#define KNOWN_BOARD 1
 
 #endif
 

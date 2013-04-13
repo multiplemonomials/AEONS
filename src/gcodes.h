@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
 	gcodes.h
 	 
-	By MultipleMonomials and ChatterComa, thx to Kliment
+	By MultipleMonomials and ChatterComa
 -----------------------------------------------------------------------------*/
 
 #ifndef GCODES_H
@@ -144,10 +144,12 @@ struct M81 : code
 };
 
 /*-----------------------------------------------------------------------------
-M81 Turn Off Power Supply
+M84 Disable Motors
 -----------------------------------------------------------------------------*/
 struct M84 : code
 {
+	int _wait_time;
+
 	M84(char * command);
 
 	void process();

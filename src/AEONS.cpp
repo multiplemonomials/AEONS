@@ -1,8 +1,8 @@
 
 /*-----------------------------------------------------------------------------
-		   ____						__
-   /\     |         __     |\   |  /  \
-  /  \    |____   /    \   | \  |  \___
+		   ____	    __ 	     		__
+   /\     |       /    \   |\   |  /  \
+  /  \    |____  |      |  | \  |  \___
  /----\   |      |      |  |  \ |      \
 /      \  |____   \ __ /   |   \|   ___/
                                        ...because C++ isn't quite so bad after all.
@@ -24,10 +24,12 @@ Implemented Codes
 	M105 - Read current temp
 	M106 - Fan on
 	M107 - Fan off
+	M114 - Display current position
 
 	Custom M-Codes:
 	M80  - Turn on Power Supply
 	M81  - Turn off Power Supply
+	M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 	M140 - Set bed target temp
 	M116 - Wait for extuder AND bed to heat up
 	M222 - Report assued position
@@ -39,15 +41,13 @@ To Be Implemented
 
 	RepRap M Codes
 
-	M109 - Wait for extruder current temp to reach target temp.
-	M114 - Display current position
+	M109 - Wait for extruder current temp to reach target temp
 
 	Custom M Codes
 
 	M42 - Set output on free pins, on a non pwm pin (over pin 13 on an arduino mega) use S255 to turn it on and S0 to turn it off.
 		  Use P to decide the pin (M42 P23 S255) would turn pin 23 on
-	M84  - Disable steppers until next move,
-			or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
+	M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 	M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 	M92  - Set axis_steps_per_unit - same syntax as G92
 	M115 - Capabilities string
@@ -444,12 +444,22 @@ void fix_comments(char * command)
 }
 
 /*-----------------------------------------------------------------------------
-Sets every member of command to null so it can be reused.
+Null-terminates command
 -----------------------------------------------------------------------------*/
 void clear_command()
 {
 		Printer::instance().command[0] = '\0';
 }
+
+/*-----------------------------------------------------------------------------
+ * Return the temperature of the active extruder.
+ * Only here because it needs to see both Printer and Heater
+-----------------------------------------------------------------------------*/
+unsigned int getCurrentExtruderTemperature()
+{
+	return &(Printer::instance().e_axis) == &(Printer::instance().e_axis_0) ? Printer::instance().Extruder.getTemperature() : Printer::instance().Extruder_2.getTemperature();
+}
+
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 void init_pins()

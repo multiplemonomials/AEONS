@@ -24,6 +24,8 @@ void fix_comments(char * command);
 
 void clear_command();
 
+unsigned int getCurrentExtruderTemperature();
+
 void init_pins(); //eventually this will be removed once everything inits its own pins
 
 #endif

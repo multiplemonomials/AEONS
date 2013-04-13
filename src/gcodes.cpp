@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
 	gcodes.cpp
 	Code file fr all of the gcode objects
-	By MultipleMonomials and ChatterComa, thx to Kliment
+	By MultipleMonomials and ChatterComa
 -----------------------------------------------------------------------------*/
 
 #include "gcodes.h"
@@ -294,7 +294,7 @@ M84 Disable Motors
 
 M84::M84(char * command)
 {
-	// TBD
+	_wait_time = get_value_from_char_array(command, 'S');
 }
 
 void M84::process()
@@ -307,15 +307,19 @@ void M84::process()
 
 /*-----------------------------------------------------------------------------
 M104 (Sxxx) Set extruder temperature to given temp
+If you have multiple extruders, it will set the temp for ONLY the current one!
 -----------------------------------------------------------------------------*/
 
 M104::M104(char * command)
 {
 	s_value =(int) get_value_from_char_array(command, 'S');
-	if(s_value == 0)
-	{
-		Serial.println("No argument (M104 Sxxx) provided for M104, setting temp to 0...");
-	}
+
+	#ifdef DEBUG_GCODE_PROCESSING
+		if(s_value == 0)
+		{
+			Serial.println("No argument (M104 Sxxx) provided for M104, setting temp to 0...");
+		}
+	#endif
 	
 }
 
@@ -324,7 +328,7 @@ M104::M104(char * command)
 void M104::process()
 {
 	#ifdef HAS_EXTRUDER
-		Printer::instance().Extruder.setTemperature(s_value);
+	&(Printer::instance().e_axis) == &(Printer::instance().e_axis_0) ? Printer::instance().Extruder.setTemperature(s_value) : Printer::instance().Extruder_2.setTemperature(s_value);
 	#endif
 }
 
@@ -341,14 +345,15 @@ void M105::process()
 {
 	#ifdef HAS_EXTRUDER
 		Serial.print("ok\n T:");
-		Serial.print(Printer::instance().Extruder.getTemperature()); 
+		Serial.print(getCurrentExtruderTemperature());
 	#endif
 	#ifdef HAS_BED
 		Serial.print(" B:");
 		Serial.println(Printer::instance().Bed.getTemperature());
-	#else
-		Serial.print('\n');
 	#endif
+
+		Serial.print('\n');
+
 }
 
 
@@ -446,14 +451,23 @@ void M116::process()
 
 	do
 	{
-		//not too cold
+
+		#ifdef HAS_EXTRUDER
+			extruder_up_to_temp = //not too cold
+					(Printer::instance().Extruder.getTemperature() >= (Printer::instance().Extruder.getTarget() - TEMPDELTA)) &&
+					//not too hot
+					(Printer::instance().Extruder.getTemperature() <= (Printer::instance().Extruder.getTarget() + TEMPDELTA));
+		#endif
+
 		#ifdef HAS_EXTRUDER
 			extruder_up_to_temp =
-					(Printer::instance().Extruder.getTemperature() >= (Printer::instance().Extruder.getTarget() - TEMPDELTA)) &&
-					(Printer::instance().Extruder.getTemperature() <= (Printer::instance().Extruder.getTarget() + TEMPDELTA));
-			Serial.print("ok T:");
-			Serial.print(Printer::instance().Extruder.getTemperature());
+					(Printer::instance().Extruder_2.getTemperature() >= (Printer::instance().Extruder_2.getTarget() - TEMPDELTA)) &&
+					(Printer::instance().Extruder_2.getTemperature() <= (Printer::instance().Extruder_2.getTarget() + TEMPDELTA));
 		#endif
+
+		Serial.print("ok T:");
+		Serial.print(getCurrentExtruderTemperature());
+
 
 		//calling Extruder.getTemperature automatically manages the temperature
 		#ifdef HAS_BED

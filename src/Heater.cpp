@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------
 	Heater.cpp
-	 
-	By MultipleMonomials and ChatterComa, thx to Kliment
+	Heater objects which control extruders and beds
+	By MultipleMonomials and ChatterComa
 -----------------------------------------------------------------------------*/
 
 #include "Heater.h"
