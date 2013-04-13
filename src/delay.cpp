@@ -54,7 +54,7 @@ delay_milliseconds::delay_milliseconds(float delay_time)
 -----------------------------------------------------------------------------*/
 delay_microseconds::delay_microseconds(float delay_time)
 {
-	saved_delay = (int)(delay_time * 1000.0);
+	saved_delay = (int)((delay_time * 1000.0)); //-46 is to account for length of movement code
 }
 
 /*-----------------------------------------------------------------------------

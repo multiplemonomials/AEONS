@@ -11,32 +11,52 @@
 -----------------------------------------------------------------------------*/
 
 G1::G1(char * command)
-{
-	// Parse the command and extract parameters if present.
-	// If we didn't recieve an argument, "move" to the current position
-	if(!get_value_from_char_array_bool(command, 'X', &x_value))
+{	if(Printer::instance().relative_mode)
 	{
-		x_value = Printer::instance().x_axis._current_position;
+		if(!get_value_from_char_array_bool(command, 'X', &x_value)) //sees if we got an X value to move to as well as initializing x_value
+		{
+			x_value = 0.0;
+		}
+		if(!get_value_from_char_array_bool(command, 'Y', &y_value))
+		{
+			y_value = 0.0;
+		}
+		if(!get_value_from_char_array_bool(command, 'Z', &z_value))
+		{
+			z_value = 0.0;
+		}
+		if(!get_value_from_char_array_bool(command, 'E', &e_value))
+		{
+			e_value = 0.0;
+		}
 	}
-
-	if(!get_value_from_char_array_bool(command, 'Y', &y_value))
+	else
 	{
-		y_value = Printer::instance().y_axis._current_position;
-	}
+		// Parse the command and extract parameters if present.
+		// If we didn't recieve an argument, "move" to the current position
+		if(!get_value_from_char_array_bool(command, 'X', &x_value))
+		{
+			x_value = Printer::instance().x_axis._current_position;
+		}
 
-	if(!get_value_from_char_array_bool(command, 'Z', &z_value))
-	{
-		z_value = Printer::instance().z_axis._current_position;
-	}
+		if(!get_value_from_char_array_bool(command, 'Y', &y_value))
+		{
+			y_value = Printer::instance().y_axis._current_position;
+		}
 
-	if(!get_value_from_char_array_bool(command, 'E', &e_value))
-	{
-		e_value = Printer::instance().e_axis._current_position;
+		if(!get_value_from_char_array_bool(command, 'Z', &z_value))
+		{
+			z_value = Printer::instance().z_axis._current_position;
+		}
+
+		if(!get_value_from_char_array_bool(command, 'E', &e_value))
+		{
+			e_value = Printer::instance().e_axis._current_position;
+		}
 	}
 
 	// Zero returned if F not supplied in command.
-	f_value = get_value_from_char_array(command, 'F');
-	if (f_value == 0.0)
+	if (!get_value_from_char_array_bool(command, 'F', &f_value))
 	{
 		//an f value was not included in the command, so use the last provided one
 		f_value = Printer::instance().last_feedrate;
@@ -264,8 +284,25 @@ void M81::process()
 	#endif
 
 	#ifdef DEBUG_GCODE_PROCESSING
-			Serial.println("Recieved M80, turning off power supply...");
+			Serial.println("Recieved M81, turning off power supply...");
 	#endif
+}
+
+/*-----------------------------------------------------------------------------
+M84 Disable Motors
+-----------------------------------------------------------------------------*/
+
+M84::M84(char * command)
+{
+	// TBD
+}
+
+void M84::process()
+{
+	Printer::instance().x_axis.disable();
+	Printer::instance().y_axis.disable();
+	Printer::instance().z_axis.disable();
+	Printer::instance().e_axis.disable();
 }
 
 /*-----------------------------------------------------------------------------
@@ -347,6 +384,29 @@ void M107::process()
 	#endif
 }
 
+/*-----------------------------------------------------------------------------
+M114 - Report assumed postion to host
+-----------------------------------------------------------------------------*/
+
+M114::M114(char * command)
+{
+
+}
+
+//Where am I?
+void M114::process()
+{
+	Serial.println("C: ");
+	Serial.print("X: ");
+	Serial.println(Printer::instance().x_axis._current_position);
+	Serial.print("Y: ");
+	Serial.println(Printer::instance().y_axis._current_position);
+	Serial.print("Z: ");
+	Serial.println(Printer::instance().z_axis._current_position);
+	Serial.print("E: ");
+	Serial.println(Printer::instance().e_axis._current_position);
+}
+
 /*------------------------------------------------------------------------------------
 M116 [Ssss] [Pppp]-- Wait for extruder and bed to heat up (can specify temps for both)
 ------------------------------------------------------------------------------------*/
@@ -364,6 +424,13 @@ void M116::process()
 {
 	bool extruder_up_to_temp =
 	#ifdef HAS_EXTRUDER
+		false;
+	#else
+		true;
+	#endif
+
+	bool extruder_2_up_to_temp =
+	#ifdef HAS_SECOND_EXTRUDER
 		false;
 	#else
 		true;
@@ -399,7 +466,7 @@ void M116::process()
 
 		delay(2000);
 	}
-	while(!(extruder_up_to_temp && bed_up_to_temp));
+	while(!((extruder_up_to_temp && extruder_2_up_to_temp)&& bed_up_to_temp));
 
 }
 

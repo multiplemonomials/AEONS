@@ -30,6 +30,7 @@ Implemented Codes
 	M81  - Turn off Power Supply
 	M140 - Set bed target temp
 	M116 - Wait for extuder AND bed to heat up
+	M222 - Report assued position
 
 
 To Be Implemented
@@ -107,6 +108,19 @@ void setup()
 	// Invoke unit tests
 	TestAll();
 	#endif
+
+	//Debugging stuff
+//	Serial.println("Stepping Z-Axis");
+//	Printer::instance().x_axis.enable();
+//	Printer::instance().y_axis.enable();
+//	Printer::instance().z_axis.enable();
+//	Printer::instance().e_axis.enable();
+//
+//	while(true)
+//	{
+//		Printer::instance().z_axis.step();
+//		delay(1);
+//	}
 }
 
 /*-----------------------------------------------------------------------------
@@ -115,6 +129,10 @@ void manage_temperatures()
 {
 	#ifdef HAS_EXTRUDER
 		Printer::instance().Extruder.manage_temperature();
+	#endif
+
+	#ifdef HAS_SECOND_EXTRUDER
+		Printer::instance().Extruder_2.manage_temperature();
 	#endif
 
 	#ifdef HAS_BED
@@ -292,6 +310,10 @@ code * gcode_factory()
 				return new M81(Printer::instance().command);
 				break;
 
+			case 84:
+				return new M84(Printer::instance().command);
+				break;
+
 			case 104:
 				return new M104(Printer::instance().command);
 				break;
@@ -309,6 +331,10 @@ code * gcode_factory()
 				return new M107(Printer::instance().command);
 				break;
 
+			case 114:
+				return new M114(Printer::instance().command);
+				break;
+
 			case 116:
 				return new M116(Printer::instance().command);
 				break;
@@ -317,6 +343,36 @@ code * gcode_factory()
 				return new M140(Printer::instance().command);
 				break;
 		}
+	}
+	float t_value;
+
+	if(get_value_from_char_array_bool(Printer::instance().command, 'T', &t_value))
+	{
+		//we're changing the extruder to extruder t_value]
+		//starts at extruder 0
+		switch((uint16_t)t_value)
+		{
+			//default extruder
+			#ifdef HAS_EXTRUDER
+				case 0:
+					Printer::instance().e_axis = Printer::instance().e_axis_0;
+					break;
+			#endif
+
+			#ifdef HAS_SECOND_EXTRUDER
+				case 1:
+					Printer::instance().e_axis = Printer::instance().e_axis_1;
+					break;
+
+			#endif
+
+			default:
+				Serial.print("ERROR: Extruder ");
+				Serial.print(t_value);
+				Serial.print("Not found");
+				break;
+		}
+
 	}
 
 	Serial.println("ERROR: Gcode not found");

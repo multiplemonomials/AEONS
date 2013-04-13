@@ -26,7 +26,7 @@
 			o Max feedrate.
 			o current axis position
 -----------------------------------------------------------------------------*/
-struct Axis
+class Axis
 {
 public:
 	float _current_position;

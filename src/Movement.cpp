@@ -13,7 +13,7 @@ Movement::Movement(float x_target, float y_target, float z_target, float e_targe
 	_y_target(y_target),
 	_z_target(z_target),
 	_e_target(e_target),
-	_feedrate(feedrate),
+	_feedrate((int)feedrate!=0 ? feedrate : Printer::instance().last_feedrate),
 
 	_total_x_steps(0),
 	_total_y_steps(0),
@@ -24,11 +24,15 @@ Movement::Movement(float x_target, float y_target, float z_target, float e_targe
 	_proposed_y_feedrate(0),
 	_proposed_z_feedrate(0),
 	_proposed_e_feedrate(0),
+	_x_movement_factor(0),
+	_y_movement_factor(0),
+	_z_movement_factor(0),
+	_e_movement_factor(0),
 
-	_x_interval(0),
-	_y_interval(0),
-	_z_interval(0),
-	_e_interval(0),
+	_x_steps_counter(0),
+	_y_steps_counter(0),
+	_z_steps_counter(0),
+	_e_steps_counter(0),
 
 	_loops_to_do(0),
 
@@ -47,11 +51,14 @@ Movement::Movement(float x_target, float y_target, float z_target, float e_targe
 
 /*-----------------------------------------------------------------------------
 	calculate intervals and feedrates to prepare for move
+	works in RELATIVE MODE
 -----------------------------------------------------------------------------*/
 void Movement::calculate_values()
 {
 	// Truncate the move coordinates to be within the printer's printable area.
 	restrict_to_printable_area();
+
+	update_current_position();
 
 	// If some moves are negative, set the axis to move in a negative direction,
 	// then convert to positive value.
@@ -115,6 +122,16 @@ void Movement::restrict_to_printable_area()
 	#endif
 }
 
+//-------------------------------------------------------------------------------
+//  Tell the axes where they are now
+//  It has to go here because it needs to see the targets before they are absolute valued
+//-------------------------------------------------------------------------------
+void Movement::update_current_position()
+{
+	Printer::instance().x_axis.setCurrentPosition(Printer::instance().x_axis.getCurrentPosition() + _x_target);
+	Printer::instance().y_axis.setCurrentPosition(Printer::instance().y_axis.getCurrentPosition() + _y_target);
+	Printer::instance().z_axis.setCurrentPosition(Printer::instance().z_axis.getCurrentPosition() + _z_target);
+}
 //-------------------------------------------------------------------------------
 //  if some moves are negative, set the axis to move in a negative direction,
 // then convert to positive value.
@@ -223,10 +240,10 @@ void Movement::calculate_movement_ratios()
 {
 	_loops_to_do = LCM(_total_x_steps, _total_y_steps, _total_z_steps, _total_e_steps);
 
-	_x_interval = (_total_x_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_x_steps);
-	_y_interval = (_total_y_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_y_steps);
-	_z_interval = (_total_z_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_z_steps);
-	_e_interval = (_total_e_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_e_steps);
+	_x_movement_factor = (_total_x_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_x_steps);
+	_y_movement_factor = (_total_y_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_y_steps);
+	_z_movement_factor = (_total_z_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_z_steps);
+	_e_movement_factor = (_total_e_steps == 0) ? (_loops_to_do + 1) : (_loops_to_do / _total_e_steps);
 }
 
 //-------------------------------------------------------------------------------
@@ -275,16 +292,17 @@ void Movement::print_debug_values()
 		DISPLAY_IT(_total_y_steps);
 		DISPLAY_IT(_total_z_steps);
 		DISPLAY_IT(_total_e_steps);
-		DISPLAY_IT(_x_interval);
-		DISPLAY_IT(_y_interval);
-		DISPLAY_IT(_z_interval);
-		DISPLAY_IT(_e_interval);
+		DISPLAY_IT(_x_movement_factor);
+		DISPLAY_IT(_y_movement_factor);
+		DISPLAY_IT(_z_movement_factor);
+		DISPLAY_IT(_e_movement_factor);
 		DISPLAY_IT(_x_target);
 		DISPLAY_IT(_y_target);
 		DISPLAY_IT(_z_target);
 		DISPLAY_IT(_e_target);
 		DISPLAY_IT(_move_time_in_ms);
 		DISPLAY_IT(_move_distance_in_mm);
+		DISPLAY_IT(_feedrate);
 		Serial.print("Calculation took: ");
 		Serial.println(calculation_time_millisconds);
 		#undef DISPLAY_IT
@@ -434,32 +452,35 @@ uint16_t Movement::LCM(unsigned int x_val, unsigned int y_val, unsigned int z_va
 void Movement::step_loop()
 
 {
-	_x_steps_counter = _x_interval;
+	_x_steps_counter = _x_movement_factor;
+	_y_steps_counter = _y_movement_factor;
+	_z_steps_counter = _z_movement_factor;
+	_e_steps_counter = _e_movement_factor;
 
 	for(int tick_counter = _loops_to_do; tick_counter > 0; tick_counter--)
 	{
 		if(--_x_steps_counter == 0)
 		{
 			Printer::instance().x_axis.step();
-			_x_steps_counter = _x_interval;
+			_x_steps_counter = _x_movement_factor;
 		}
 
 		if(--_y_steps_counter == 0)
 		{
 			Printer::instance().y_axis.step();
-			_y_steps_counter = _y_interval;
+			_y_steps_counter = _y_movement_factor;
 		}
 
 		if(--_z_steps_counter == 0)
 		{
 			Printer::instance().z_axis.step();
-			_z_steps_counter = _z_interval;
+			_z_steps_counter = _z_movement_factor;
 		}
 
 		if(--_e_steps_counter == 0)
 		{
 			Printer::instance().e_axis.step();
-			_e_steps_counter = _e_interval;
+			_e_steps_counter = _e_movement_factor;
 		}
 
 		(*_delayer)();

@@ -24,6 +24,9 @@ Printer::Printer()
 	#ifdef HAS_EXTRUDER
 		Extruder(extruder_heater_device, TEMP_0_PIN, HEATER_0_PIN, TEMPTABLE),
 	#endif
+	#ifdef HAS_SECOND_EXTRUDER
+		Extruder_2(extruder_heater_device, TEMP_2_PIN, HEATER_2_PIN, TEMPTABLE),
+	#endif
 	#ifdef HAS_BED
 		Bed(extruder_heater_device, TEMP_1_PIN, HEATER_1_PIN, BEDTEMPTABLE),
 	#endif
@@ -35,7 +38,9 @@ Printer::Printer()
 	x_axis(X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_ENDSTOP_PIN, INVERT_X_DIR, ENDSTOPS_AT_MIN, X_ENDSTOP_INVERT, X_STEPS_PER_MM, XY_AXES_MAX_FEEDRATE, XY_AXES_HOMING_FEEDRATE, STEPPER_PULSE_WIDTH),
 	y_axis(Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_ENDSTOP_PIN, INVERT_Y_DIR, ENDSTOPS_AT_MIN, Y_ENDSTOP_INVERT, Y_STEPS_PER_MM, XY_AXES_MAX_FEEDRATE, XY_AXES_HOMING_FEEDRATE, STEPPER_PULSE_WIDTH),
 	z_axis(Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_ENDSTOP_PIN, INVERT_Z_DIR, ENDSTOPS_AT_MIN, Z_ENDSTOP_INVERT, Z_STEPS_PER_MM, Z_AXIS_MAX_FEEDRATE, ZE_AXES_HOMING_FEEDRATE, STEPPER_PULSE_WIDTH),
-	e_axis(E_STEP_PIN, E_DIR_PIN, E_ENABLE_PIN, -1,            INVERT_E_DIR, ENDSTOPS_AT_MIN,            false, E_STEPS_PER_MM, E_AXIS_MAX_FEEDRATE, ZE_AXES_HOMING_FEEDRATE, STEPPER_PULSE_WIDTH)
+	e_axis_0(E_STEP_PIN, E_DIR_PIN, E_ENABLE_PIN, -1,            INVERT_E_DIR, ENDSTOPS_AT_MIN,            false, E_STEPS_PER_MM, E_AXIS_MAX_FEEDRATE, ZE_AXES_HOMING_FEEDRATE, STEPPER_PULSE_WIDTH),
+	e_axis(e_axis_0),
+	e_axis_1(E_1_STEP_PIN, E_1_DIR_PIN, E_1_ENABLE_PIN, -1,            INVERT_E_DIR, ENDSTOPS_AT_MIN,            false, E_STEPS_PER_MM, E_AXIS_MAX_FEEDRATE, ZE_AXES_HOMING_FEEDRATE, STEPPER_PULSE_WIDTH)
 {
 	#ifdef HAS_POWER_SUPPLY
 		Power_Supply.turn_on();
@@ -44,6 +49,10 @@ Printer::Printer()
 	#ifdef HAS_EXTRUDER
 		Extruder.setTemperature(DEFAULT_EXTRUDER_TEMP);
 	#endif
+
+	#ifdef HAS_SECOND_EXTRUDER
+		Extruder_2.setTemperature(DEFAULT_EXTRUDER_TEMP);
+	#endif
 	
 	#ifdef HAS_BED
 		Bed.setTemperature(DEFAULT_BED_TEMP);
@@ -51,6 +60,12 @@ Printer::Printer()
 
 	#ifdef HAS_FAN
 		Fan.turn_on();
+	#endif
+
+	#ifdef HAS_SECOND_EXTRUDER
+
+	#else
+		e_axis_1 = NULL
 	#endif
 
 	// Select one of these only to define how the extruder temp is read.
@@ -69,6 +84,7 @@ Printer::Printer()
 	relative_mode = false;
 
 	last_feedrate = 100;
+
 }
 
 

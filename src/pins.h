@@ -892,7 +892,7 @@
 
 
 #ifndef KNOWN_BOARD
-#error Unknown MOTHERBOARD value in configuration.h
+	#error Unknown MOTHERBOARD value in configuration.h
 #endif
 
 

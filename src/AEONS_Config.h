@@ -119,16 +119,16 @@
 #define X_STEPS_PER_MM 52.504
 #define Y_STEPS_PER_MM 26.523
 #define Z_STEPS_PER_MM 2267.567
-#define E_STEPS_PER_MM 760.0
+#define E_STEPS_PER_MM 100.25
 
 //feedrate limits for axes--defaults should be OK for most people
 #define XY_AXES_MAX_FEEDRATE 18000
-#define Z_AXIS_MAX_FEEDRATE 100
+#define Z_AXIS_MAX_FEEDRATE 200
 #define E_AXIS_MAX_FEEDRATE 300
 
 //feedrates to use when sent a G28 Home All Axes
 #define XY_AXES_HOMING_FEEDRATE 1500
-#define ZE_AXES_HOMING_FEEDRATE 75
+#define ZE_AXES_HOMING_FEEDRATE 150
 
 //// Endstop Settings
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
@@ -150,11 +150,21 @@
 //recommended to leave disabled
 //#define DISABLE_AXES_AFTER_MOVE
 
+//enable the second extruder if your board supports it?
+#define ENABLE_SECOND_EXTRUDER
+
 //User settings above this line, don't mess with stuff below
 //-------------------------------------------------------------------------------------------------------------------------------------------
 
 #if HEATER_0_PIN > -1
 	#define HAS_EXTRUDER
+#endif
+
+#if (E_1_STEP_PIN > -1) && defined(ENABLE_SECOND_EXTRUDER)
+	#if (TEMP_2_PIN < 0)
+		#error "Couldn't find temp settings for second extruder.  You may need to manually add them."
+	#endif
+	#define HAS_SECOND_EXTRUDER
 #endif
 
 #if TEMP_1_PIN > -1

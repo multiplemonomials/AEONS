@@ -37,10 +37,10 @@ public:
 	uint16_t _proposed_z_feedrate;
 	uint16_t _proposed_e_feedrate;
 
-	StepCount _x_interval;
-	StepCount _y_interval;
-	StepCount _z_interval;
-	StepCount _e_interval;
+	StepCount _x_movement_factor;
+	StepCount _y_movement_factor;
+	StepCount _z_movement_factor;
+	StepCount _e_movement_factor;
 
 	uint16_t _loops_to_do;
 
@@ -67,6 +67,8 @@ public:
 	bool is_valid();
 
 	void restrict_to_printable_area();
+
+	void update_current_position();
 
 	void absolute_valueize_direction();
 
