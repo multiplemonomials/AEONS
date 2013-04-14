@@ -32,7 +32,6 @@ Implemented Codes
 	M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 	M140 - Set bed target temp
 	M116 - Wait for extuder AND bed to heat up
-	M222 - Report assued position
 
 
 To Be Implemented
