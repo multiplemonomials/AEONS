@@ -317,18 +317,23 @@ M104::M104(char * command)
 	#ifdef DEBUG_GCODE_PROCESSING
 		if(s_value == 0)
 		{
-			Serial.println("No argument (M104 Sxxx) provided for M104, setting temp to 0...");
+			Serial.println("No argument (M104 S<temp goes here>) provided for M104, setting temp to 0...");
 		}
 	#endif
 	
 }
 
-// Will set temp to 0 if argument not found, I consider this good.
+// Will set temp to 0 if argument not found, I consider this desirable.
 
 void M104::process()
 {
-	#ifdef HAS_EXTRUDER
-	&(Printer::instance().e_axis) == &(Printer::instance().e_axis_0) ? Printer::instance().Extruder.setTemperature(s_value) : Printer::instance().Extruder_2.setTemperature(s_value);
+	#ifdef M104_AFFECTS_ALL_EXTRUDERS
+		Printer::instance().Extruder.setTemperature(s_value);
+		Printer::instance().Extruder_2.setTemperature(s_value);
+	#else
+		#ifdef HAS_EXTRUDER
+			&(Printer::instance().e_axis) == &(Printer::instance().e_axis_0) ? Printer::instance().Extruder.setTemperature(s_value) : Printer::instance().Extruder_2.setTemperature(s_value);
+		#endif
 	#endif
 }
 

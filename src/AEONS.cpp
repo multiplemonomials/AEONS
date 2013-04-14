@@ -68,6 +68,7 @@ To Be Implemented
 #include "gcodes.h"
 #include "assert.h"
 #include "UnitTest.h"
+#include "Inactivity.h"
 
 
 /*-----------------------------------------------------------------------------
@@ -103,6 +104,9 @@ void setup()
 
 	//init Priinter object
 	Printer::instance();
+
+	//init inactivity timer
+	Inactivity::instance();
 
 	#ifdef RUN_UNIT_TESTS
 	// Invoke unit tests
@@ -147,6 +151,7 @@ void loop()
 	manage_temperatures();
 	if(Serial.available())
 	{
+		Inactivity::instance().clear();
 		get_next_command(Printer::instance().command, sizeof(Printer::instance().command));
 		code * code_recieved = gcode_factory();
 		if(code_recieved!=NULL)
@@ -158,7 +163,10 @@ void loop()
 
 		clear_command();
 	}
+	Inactivity::instance().check();
 }
+
+
 
 /*-----------------------------------------------------------------------------
 	General-purpose routine for assembling characters from the serial port

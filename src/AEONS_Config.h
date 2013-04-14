@@ -137,13 +137,13 @@
 #define Y_ENDSTOP_INVERT true
 #define Z_ENDSTOP_INVERT true
 
-//optimization settings:
+//misc settings:
 //-------------------------------------------------------------------------------------------------------------------------------------------
 //check the endstop state while we're moving, or rely on software endstops?  May increase maximum speed.
 //#define ENDSTOP_CHECK_DURING_MOVE
 
 //verify gcodes with a checksum if your host supports it (pronterface does not)
-//may give a speed improvement if disabled, leave on if not sure
+//may give a speed improvement when disabled, leave off if not sure
 //#define VERIFY_GCODES
 
 //disable axes after each move
@@ -152,6 +152,20 @@
 
 //enable the second extruder if your board supports it?
 #define ENABLE_SECOND_EXTRUDER
+
+//does sending an M104 (set extruder temperature) affect both extruders of just the currently selected one?
+//#define M104_AFFECTS_ALL_EXTRUDERS
+
+//inactivity timeout, in SECONDS
+//it will update the inactivity timout when anything comes over the serial line.
+//set to 0 to disable
+#define INACTIVITY_TIMEOUT_IN_SECONDS 2700 //45 minutes
+
+//what to do when the inactivity timmeout is reached?
+//you may uncomment more than one
+#define WARN_HOST_ON_SHUTDOWN //print a message to the host saying the printer is shutting down now
+#define SET_TEMPS_TO_0_ON_SHUTDOWN
+#define TURN_OFF_POWER_SUPPLY_ON_SHUTDOWN //turn off (allow to drift) the power supply enable pin
 
 //User settings above this line, don't mess with stuff below
 //-------------------------------------------------------------------------------------------------------------------------------------------
