@@ -62,7 +62,7 @@ void Inactivity::check()
 			return;
 		}
 
-		if(last_activity_milliseconds + (unsigned long)(INACTIVITY_TIMEOUT_IN_SECONDS * 1000) < (unsigned long)millis())
+		if((last_activity_milliseconds / 1000) + (unsigned long)INACTIVITY_TIMEOUT_IN_SECONDS < (millis() / 1000))
 		{
 			// Time has not expired.
 			return;
