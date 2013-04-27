@@ -8,49 +8,21 @@
 
 *inactivity timeout
 
-Beta Release CHECKLIST:
+Next Beta Release (2) CHECKLIST:
 ----------------------------------------------------------------------
-X linear move algorithm
+O Acceleration, controllable via gcode
 
-X Fix G1 call
+O Runtime config
 
-X fix syntax highlighting for AEONS.cpp
+O M109 and M190
 
-X step test code
-
-X Axis object
-
-X inactivity timeout
-
-X Multiple extruder support
-
-? Final code review
-
-? TESTING!
+O G4
 
 KNOWN ISSUES/MISSING FEATURES:
 ----------------------------------------------------------------------
 //X means fixed, O means still wild
 
-X gcodes.cpp: will crash/behave unexpectedly if G1 with NO ARGUMENTS is recieved
 
-X AEONS_Config.h: move movement settings from Printer.cpp Axis constructor calls
-
-X Movement.cpp: Max feedrate? What max feedrate?
-
-X Movement.cpp: use functors to fix the delay time floating point issues
-
-X Movement.cpp: Add a debug thing to measure the algorithm time
-
-X Movement.cpp: Software endstops? What software endstops?
-
-X Movemement.cpp: only enable axes when we need to and disable them after we're done
-
-X speed up endstop code
-
-X Change pins.h to fix compiler warnings by separating board and board version
-
-X AEONS.cpp:verify() needs to verify the code checksum as well as the line number
 _______________________________________________________________________
 
 O Heater.cpp: MAX6675 support unimplemented
