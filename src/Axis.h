@@ -10,7 +10,6 @@
 #include "AEONS_Config.h"
 #include "Arduino.h"
 #include "pin.h"
-#include "delay.h"
 
 /*-----------------------------------------------------------------------------
 	Controls a movement axis.

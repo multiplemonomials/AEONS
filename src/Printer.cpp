@@ -85,6 +85,8 @@ Printer::Printer()
 
 	last_feedrate = 100;
 
+	max_acceleration = MAX_ACCELERATION;
+
 }
 
 /*-----------------------------------------------------------------------------

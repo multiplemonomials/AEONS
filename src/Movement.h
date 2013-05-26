@@ -11,14 +11,14 @@
 #include "AEONS.h"
 #include "Arduino.h"
 #include "AEONS_Typedefs.h"
-#include "delay.h"
+#include "Delayer.h"
 
 class Movement
 {
 public:
 
 #ifdef DEBUG_MOVEMENT
-	unsigned long start_millis;
+	unsigned long _start_millis;
 #endif
 
 	float _x_target;
@@ -51,7 +51,7 @@ public:
 
 	uint32_t _calculation_time_millisconds;
 
-	delay_base* _delayer;
+	Delayer* _delayer;
 
 	StepCount _x_steps_counter;
 	StepCount _y_steps_counter;
@@ -84,6 +84,8 @@ public:
 	void update_endstop_clearances();
 
 	void calculate_delays();
+
+	void generate_accelimap();
 
 	void print_debug_values();
 
@@ -131,6 +133,6 @@ void move(float x_target, float y_target, float z_target, float e_target, float 
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-void step_loop (delay_base* delayer, unsigned int loop_count, StepCount x_steps_per_tick, StepCount y_steps_per_tick, StepCount z_steps_per_tick, StepCount e_steps_per_tick);
+void step_loop (Delayer* delayer, unsigned int loop_count, StepCount x_steps_per_tick, StepCount y_steps_per_tick, StepCount z_steps_per_tick, StepCount e_steps_per_tick);
 
 #endif

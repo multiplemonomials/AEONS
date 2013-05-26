@@ -95,7 +95,7 @@
 //#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
 //#define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY (or may not) ENSUE
 //#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
-//#define DEBUG_MOVEMENT       //debug movement calculation
+#define DEBUG_MOVEMENT       //debug movement calculation
 #define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
 #define ACTUALLY_MOVE   //does the printer move when told to?
 //#define DEBUG_ENDSTOPS  //why won't that axis move?
@@ -137,10 +137,20 @@
 #define Y_ENDSTOP_INVERT true
 #define Z_ENDSTOP_INVERT true
 
+//disable acceleration
+//won't really make it go any faster
+//#define ACCELERATION_KILL
+
+//fraction of the normal speed to start accelerating at
+//e.g. 4 would start going at 1/4 speed
+#define ACCEL_START_SPEED_MULTIPLIER 8
+
+#define MAX_ACCELERATION 100 // mm/s
+
 //misc settings:
 //-------------------------------------------------------------------------------------------------------------------------------------------
 //check the endstop state while we're moving, or rely on software endstops?  May increase maximum speed.
-//#define ENDSTOP_CHECK_DURING_MOVE
+#define ENDSTOP_CHECK_DURING_MOVE
 
 //verify gcodes with a checksum if your host supports it (pronterface does not)
 //may give a speed improvement when disabled, leave off if not sure
@@ -163,7 +173,7 @@
 
 //what to do when the inactivity timmeout is reached?
 //you may uncomment more than one
-#define WARN_HOST_ON_SHUTDOWN //print a message to the host saying the printer is shutting down now
+//#define WARN_HOST_ON_SHUTDOWN //print a message to the host saying the printer is shutting down now
 #define SET_TEMPS_TO_0_ON_SHUTDOWN
 #define TURN_OFF_POWER_SUPPLY_ON_SHUTDOWN //turn off (allow to drift) the power supply enable pin
 

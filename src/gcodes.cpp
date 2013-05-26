@@ -89,6 +89,24 @@ void G1::process()
 }
 
 /*-----------------------------------------------------------------------------
+G4 Delay Pxxx Milliseconds
+-----------------------------------------------------------------------------*/
+G4::G4(char * command)
+{
+	_command = command;
+	p_value = (int)get_value_from_char_array(command, 'P');
+}
+
+/*-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------*/
+void G4::process()
+{
+	delay(p_value);
+}
+
+
+/*-----------------------------------------------------------------------------
 G28 Home All
 -----------------------------------------------------------------------------*/
 G28::G28(char * command)
@@ -519,4 +537,50 @@ void M140::process()
 
 }
 
+/*-----------------------------------------------------------------------------
+M201 - Set max [printing] acceleration
+-----------------------------------------------------------------------------*/
+M201::M201(char * command)
+{
+	//keep searching the possible arguments until we find one that is not zero
+
+	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'X');
+	if(acceleration_value != 0)
+	{
+		return;
+	}
+
+	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'Y');
+	if(acceleration_value != 0)
+	{
+		return;
+	}
+
+	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'Z');
+	if(acceleration_value != 0)
+	{
+		return;
+	}
+
+	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'E');
+	if(acceleration_value != 0)
+	{
+		return;
+	}
+
+
+}
+
+void M201::process()
+{
+	if((acceleration_value == 0) || (acceleration_value == 1))
+	{
+		//we didn't get anything
+		//1 is the kryptonite of our acceleration algorythm, as 1-(1/1) = 0
+		return;
+	}
+
+	Printer::instance().max_acceleration = acceleration_value;
+
+}
 

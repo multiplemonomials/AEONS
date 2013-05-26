@@ -122,7 +122,7 @@ void setup()
 //	while(true)
 //	{
 //		Printer::instance().z_axis.step();
-//		delay(1);
+//		Delayer(1);
 //	}
 }
 
@@ -348,6 +348,11 @@ code * gcode_factory()
 
 			case 140:
 				return new M140(Printer::instance().command);
+				break;
+
+			case 201:
+			case 202:
+				return new M201(Printer::instance().command);
 				break;
 		}
 	}

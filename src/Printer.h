@@ -61,6 +61,8 @@ public:
 
 	float last_feedrate;
 
+	uint32_t max_acceleration;
+
 	
 private:
 

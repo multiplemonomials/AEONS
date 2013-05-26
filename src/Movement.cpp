@@ -6,7 +6,7 @@
 -----------------------------------------------------------------------------*/
 Movement::Movement(float x_target, float y_target, float z_target, float e_target, float feedrate) :
 #ifdef DEBUG_MOVEMENT
-	start_millis(millis()),
+	_start_millis(millis()),
 #endif
 
 	_x_target(x_target),
@@ -266,13 +266,13 @@ void Movement::update_endstop_clearances()
 //-------------------------------------------------------------------------------
 void Movement::calculate_delays()
 {
-	// Calculate delay per mm of movement to achieve the stated feed rate.
+	// Calculate Delayer per mm of movement to achieve the stated feed rate.
 	_move_distance_in_mm 			= _x_target + _y_target + _z_target + _e_target;
 	_feedrate_mm_per_millisecond 	= _feedrate / (60.0 * 1000.0);
 	_move_time_in_ms				= _move_distance_in_mm / _feedrate_mm_per_millisecond;
 	_time_in_ms_per_loop			= _move_time_in_ms / _loops_to_do;
 
-	_delayer 						= delay_base::delay_factory(_time_in_ms_per_loop);
+	_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
 }
 
 
@@ -282,7 +282,7 @@ void Movement::calculate_delays()
 void Movement::print_debug_values()
 {
 	#ifdef DEBUG_MOVEMENT
-		unsigned long calculation_time_millisconds = millis() - start_millis;
+		unsigned long calculation_time_millisconds = millis() - _start_millis;
 
 		#define DISPLAY_IT(__val) Serial.print(#__val); Serial.print(": "); Serial.println(__val)
 		Serial.println("Calling move function with parameters:");
@@ -323,7 +323,7 @@ void Movement::execute()
 	#ifdef DEBUG_MOVEMENT
 	Serial.println("Finished Move!");
 	Serial.print("Move took ");
-	Serial.print(millis() - start_millis);
+	Serial.print(millis() - _start_millis);
 	Serial.println("milliseconds");
 	#endif
 
