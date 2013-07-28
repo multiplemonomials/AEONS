@@ -49,6 +49,52 @@ Movement::Movement(float x_target, float y_target, float z_target, float e_targe
 	// Further calculation deferred until calculate_values().
 }
 
+//for unit tests
+Movement::Movement() :
+#ifdef DEBUG_MOVEMENT
+	_start_millis(millis()),
+#endif
+
+	_x_target(0),
+	_y_target(0),
+	_z_target(0),
+	_e_target(0),
+	_feedrate(0),
+
+	_total_x_steps(0),
+	_total_y_steps(0),
+	_total_z_steps(0),
+	_total_e_steps(0),
+
+	_proposed_x_feedrate(0),
+	_proposed_y_feedrate(0),
+	_proposed_z_feedrate(0),
+	_proposed_e_feedrate(0),
+	_x_movement_factor(0),
+	_y_movement_factor(0),
+	_z_movement_factor(0),
+	_e_movement_factor(0),
+
+	_x_steps_counter(0),
+	_y_steps_counter(0),
+	_z_steps_counter(0),
+	_e_steps_counter(0),
+
+	_loops_to_do(0),
+
+	_move_distance_in_mm(0),
+	_feedrate_mm_per_millisecond(0),
+	_move_time_in_ms(0),
+	_time_in_ms_per_loop(0),
+
+	_calculation_time_millisconds(0),
+
+	_delayer()
+
+{
+
+}
+
 /*-----------------------------------------------------------------------------
 	calculate intervals and feedrates to prepare for move
 	works in RELATIVE MODE
@@ -272,7 +318,11 @@ void Movement::calculate_delays()
 	_move_time_in_ms				= _move_distance_in_mm / _feedrate_mm_per_millisecond;
 	_time_in_ms_per_loop			= _move_time_in_ms / _loops_to_do;
 
+	Serial.println("Starting Delay Calculation");
+
 	_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
+
+	Serial.println("Finished Delay Calculation");
 }
 
 

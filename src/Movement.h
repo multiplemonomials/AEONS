@@ -60,6 +60,8 @@ public:
 
 	Movement(float x_target, float y_target, float z_target, float e_target, float feedrate);
 
+	Movement();
+
 	void calculate_values();
 
 	void execute();

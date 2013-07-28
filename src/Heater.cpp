@@ -35,10 +35,10 @@ TempInDegrees Heater::getTemperature()
 -----------------------------------------------------------------------------*/
 void Heater::setTemperature(TempInDegrees target)
 {
-	#ifdef DEBUG_GCODE_PROCESSING
-		Serial.print("Setting heater to ");
-		Serial.println(target);
-	#endif
+//	#ifdef DEBUG_GCODE_PROCESSING
+//		Serial.print("Setting heater to ");
+//		Serial.println(target);
+//	#endif
 	_target = target;
 	manage_temperature();
 }

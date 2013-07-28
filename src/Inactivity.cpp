@@ -55,16 +55,19 @@ void Inactivity::check()
 {
 	#if INACTIVITY_TIMEOUT_IN_SECONDS >= 1
 
-	//millis resets itself after about 50 days, and we don't want to crash, so
+		// Guard against millis() overflow (millis resets itself after about 50 days, and we don't want to crash)
 		if(last_activity_milliseconds > millis())
 		{
 			clear();
 			return;
 		}
 
-		if((last_activity_milliseconds / 1000) + (unsigned long)INACTIVITY_TIMEOUT_IN_SECONDS < (millis() / 1000))
+
+		// Return if inactivity timeout has not expired.
+		unsigned long const deadline_milliseconds(last_activity_milliseconds + (INACTIVITY_TIMEOUT_IN_SECONDS * 1000));
+
+		if(millis() < deadline_milliseconds)
 		{
-			// Time has not expired.
 			return;
 		}
 

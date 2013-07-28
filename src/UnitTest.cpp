@@ -8,6 +8,8 @@
 #include "Arduino.h"
 #include "Movement.h"
 #include "assert.h"
+#include "AEONS_Config.h"
+#include "Printer.h"
 
 
 /*-----------------------------------------------------------------------------
@@ -57,5 +59,24 @@ void TestAll()
 	TestGCD();
 	TestLCM();
 
+	TestMovement();
+
 	Serial.println("TestALL completed successfully.");
+}
+
+void TestMovement()
+{
+	testPrintableArea();
+
+	Serial.println("TestMovement completed successfully.");
+}
+
+void testPrintableArea()
+{
+	Movement * movement = new Movement();
+	movement->_x_target = X_MAX_LENGTH + 1;
+	movement->restrict_to_printable_area();
+	Serial.println(movement->_x_target);
+	ASSERT(movement->_x_target + Printer::instance().x_axis._current_position <= X_MAX_LENGTH);
+	delete movement;
 }
