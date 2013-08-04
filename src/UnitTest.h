@@ -16,7 +16,7 @@ void TestAll();
 
 void TestMovement();
 
-void testPrintableArea();
+//void testPrintableArea();
 
 
 #endif

@@ -52,7 +52,7 @@
 #define THERMISTORBED 1
 
 // This determines the communication speed of the printer
-#define BAUDRATE 115200
+#define BAUDRATE 9600
 
 //// ADVANCED SETTINGS - to tweak thermistor temps:
 #include "thermistortables.h"
@@ -145,7 +145,7 @@
 //e.g. 4 would start going at 1/4 speed
 #define ACCEL_START_SPEED_MULTIPLIER 8
 
-#define MAX_ACCELERATION 100 // mm/s
+#define MAX_ACCELERATION 15 // mm/s/s
 
 //misc settings:
 //-------------------------------------------------------------------------------------------------------------------------------------------

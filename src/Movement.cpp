@@ -320,7 +320,8 @@ void Movement::calculate_delays()
 
 	Serial.println("Starting Delay Calculation");
 
-	_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
+	//_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
+	_delayer 						= new Delayer(_loops_to_do, _time_in_ms_per_loop);
 
 	Serial.println("Finished Delay Calculation");
 }

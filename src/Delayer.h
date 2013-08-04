@@ -28,39 +28,57 @@
 typedef uint32_t DelayTimeInMicroseconds;
 
 /*-----------------------------------------------------------------------------
-	Provides scripted delayes for use during a move operation.  Factory
-	service calcualtes acceleration values, then provides a pre-computed
-	table of delay values which are used in successive calls to operator ().
+	Calculates variable delay times to use in each print head move.
+	Implements print head acceleration and deceleration.
 -----------------------------------------------------------------------------*/
 class Delayer
 {
 private:
 
-	// Variable-length array of delay values.
-	DelayRun * _delay_map;
+	// Delay value returned by previous operator() call.
+	float _previous_delay;
 
-	// Length of above.
-	uint16_t _delay_map_length;
+	// Delay value returned at maximum print head speed.
+	float _min_delay;
 
-	// Number of calls to operator() so far.
-	uint16_t _global_counter;
+	// Acceleration to use for current move.
+	double _max_accel_s_mm_s;
 
-	// Ctor.  Private since this object is always factory-built.
-	Delayer(DelayRun * delay_map, uint16_t map_length);
+	// The number of times the delay function has been called so far.
+	uint16_t delayer_calls_so_far;
+
+	// The total number of times that operator() wil be called on this move.
+	uint16_t total_delayer_calls;
+
+	// Holds the point at which the deceleration begins.
+	uint16_t decel_location;
+
+	// Number of operator() calls that bring us to the half-way point of the move.
+	uint16_t halfway_point;
+
+	// Move can be in one of three states:  Accelerating, steady-state at
+	// maximum spee, or decelerating.  The operator() function does different
+	// sets of calculations depending on the current state.
+	enum States
+	{
+		ACCEL,
+		MAX_SPEED,
+		DECEL
+	};
+
+	// Current state of the move.
+	States state;
 
 
 public:
 
-	// Creates and returns a new Delayer object using the specified information.
-	static Delayer * factory(float min_delay, uint16_t total_delayer_calls);
+	// Ctor.  Private since this object is always factory-built.
+	Delayer(uint32_t delayer_calls, float min_delay);
 
 	// Call to provide the appropriate delay.
 	void operator ()();
 
 	void debug_accelimap();
-
-	// Dtor.  Needed to free delay_map from heap.
-	~Delayer();
 };
 
 
