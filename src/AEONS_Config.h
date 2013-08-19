@@ -92,34 +92,37 @@
 
 //You can control debugging below the following line:
 // Comment these out (using // at the start of the line)
-//#define DEBUG_RAW_TEMP_VALUE //for creating your own thermistor table
-#define DEBUG_GCODE_PROCESSING //are the sent gcodes being interpreted properly? SEVERE LAG MAY (or may not) ENSUE
-//#define DEBUG_GCODE_PARSING  //debug serial reading and parsing.
-#define DEBUG_MOVEMENT       //debug movement calculation
-#define RUN_UNIT_TESTS  // Uncomment to run unit tests at startup.
-#define ACTUALLY_MOVE   //does the printer move when told to?
-//#define DEBUG_ENDSTOPS  //why won't that axis move?
+//#define DEBUG_RAW_TEMP_VALUE 		//for creating your own thermistor table
+//#define DEBUG_GCODE_PROCESSING 	//are the sent gcodes being interpreted properly? SEVERE LAG MAY (or may not) ENSUE
+//#define DEBUG_GCODE_PARSING  		//debug serial reading and parsing.
+//#define DEBUG_MOVEMENT       		//debug movement calculation
+//#define DEBUG_MOVEMENT_STEPS      //debug every single step
+#define RUN_UNIT_TESTS  			// Uncomment to run unit tests at startup.
+#define ACTUALLY_MOVE   			//does the printer move when told to?
+//#define DEBUG_ENDSTOPS  			//why won't that axis move?
+//#define DEBUG_INACTIVITY  		//tell how long till the inactivity shutdown
+
 
 //MOVEMENT SETTINGS
 //-------------------------------------------------------------------------------------------------------------------------------------------
 
 // Inverting axis direction
-#define INVERT_X_DIR false
+#define INVERT_X_DIR true
 #define INVERT_Y_DIR false
-#define INVERT_Z_DIR true
-#define INVERT_E_DIR false
+#define INVERT_Z_DIR false
+#define INVERT_E_DIR true
 
 // For Inverting Stepper Enable Pins (Active Low) use 1 (e.g. polulu), Non Inverting (Active High) use 0
 #define ENABLE_PINS_INVERTING 1
 
-#define X_MAX_LENGTH 186
+#define X_MAX_LENGTH 195
 #define Y_MAX_LENGTH 231
 #define Z_MAX_LENGTH 110
 
-#define X_STEPS_PER_MM 52.504
-#define Y_STEPS_PER_MM 26.523
+#define X_STEPS_PER_MM 52.603
+#define Y_STEPS_PER_MM 105.678
 #define Z_STEPS_PER_MM 2267.567
-#define E_STEPS_PER_MM 100.25
+#define E_STEPS_PER_MM 483.791
 
 //feedrate limits for axes--defaults should be OK for most people
 #define XY_AXES_MAX_FEEDRATE 18000
@@ -173,7 +176,7 @@
 
 //what to do when the inactivity timmeout is reached?
 //you may uncomment more than one
-//#define WARN_HOST_ON_SHUTDOWN //print a message to the host saying the printer is shutting down now
+#define WARN_HOST_ON_SHUTDOWN //print a message to the host saying the printer is shutting down now
 #define SET_TEMPS_TO_0_ON_SHUTDOWN
 #define TURN_OFF_POWER_SUPPLY_ON_SHUTDOWN //turn off (allow to drift) the power supply enable pin
 

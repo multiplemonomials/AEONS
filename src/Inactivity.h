@@ -31,10 +31,12 @@ class Inactivity
 private:
 
 	// Time in mS since last clear().
-	unsigned long last_activity_milliseconds;
+	unsigned long _last_activity_milliseconds;
 
 	// Reference to the One True Object.
 	static Inactivity * _instance;
+
+	unsigned long _deadline_milliseconds;
 
 	// Private in this singleton object.
 	Inactivity();
@@ -45,7 +47,7 @@ public:
 	static Inactivity & instance();
 
 	// Restart the time period.
-	void clear();
+	void restart();
 
 	// See if too much time has elapsed and take action if so.
 	void check();

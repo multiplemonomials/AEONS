@@ -51,16 +51,19 @@ Delayer::Delayer(uint32_t delayer_calls, float min_delay)
 -----------------------------------------------------------------------------*/
 void Delayer::operator ()()
 {
-
-	float delay_time;
+	#ifdef DEBUG_MOVEMENT_STEPS
+		uint32_t time_at_start = millis();
+	#endif
+	float delay_time_in_ms;
+#ifndef ACCELERATION_KILL
 	switch(state)
 	{
 		case ACCEL:
 		{
-			delay_time = max(_min_delay, (float)_previous_delay - ((float)_previous_delay * _max_accel_s_mm_s));
+			delay_time_in_ms = max(_min_delay, (float)_previous_delay - ((float)_previous_delay * _max_accel_s_mm_s));
 
 			//if we've reached maximum speed, stay there;
-			if(delay_time == _min_delay)
+			if(delay_time_in_ms == _min_delay)
 			{
 				state = MAX_SPEED;
 				decel_location = total_delayer_calls - delayer_calls_so_far;
@@ -69,7 +72,7 @@ void Delayer::operator ()()
 			else if(delayer_calls_so_far > halfway_point)
 			{
 				state = DECEL;
-				delay_time = _previous_delay + (_previous_delay * _max_accel_s_mm_s);
+				delay_time_in_ms = _previous_delay + (_previous_delay * _max_accel_s_mm_s);
 			}
 		#ifdef DEBUG_MOVEMENT
 			Serial.print("State: ACCEL");
@@ -83,12 +86,12 @@ void Delayer::operator ()()
 			if(delayer_calls_so_far >= decel_location)
 			{
 				state = DECEL;
-				delay_time = _previous_delay + (_previous_delay * _max_accel_s_mm_s);
+				delay_time_in_ms = _previous_delay + (_previous_delay * _max_accel_s_mm_s);
 			}
 			// Otherwise just keep going at max speed.
 			else
 			{
-				delay_time = _min_delay;
+				delay_time_in_ms = _min_delay;
 			}
 		#ifdef DEBUG_MOVEMENT
 			Serial.print("State: MAX_SPEED");
@@ -98,10 +101,8 @@ void Delayer::operator ()()
 		}
 		case DECEL:
 		{
-			Serial.print("Call # ");
-			Serial.println(delayer_calls_so_far);
 			ASSERT(total_delayer_calls >= delayer_calls_so_far)
-			delay_time = _previous_delay + (_previous_delay * _max_accel_s_mm_s);
+			delay_time_in_ms = _previous_delay + (_previous_delay * _max_accel_s_mm_s);
 			break;
 		}
 		default:
@@ -115,23 +116,35 @@ void Delayer::operator ()()
 
 	++delayer_calls_so_far;
 
-	#ifdef DEBUG_MOVEMENT
+#else
+	delay_time_in_ms = _min_delay;
+#endif
+
+	#ifdef DEBUG_MOVEMENT_STEPS
 	Serial.print("Delay Time: ");
-	Serial.print(delay_time);
+	Serial.print(delay_time_in_ms);
 	Serial.print("\n");
 	#endif
 
 
-	if(delay_time > 15000)
+	// Need to produce the delay using different services depending
+	// on length.  15mS is the threshold.
+	if(delay_time_in_ms > 15.0 /* mS */)
 	{
 		// Use this for "long" delays.
-		delay(delay_time/ 1000);
+		delay((unsigned long) delay_time_in_ms);
 	}
 	else
 	{
 		// Use this for "short" delays.
-		delayMicroseconds(delay_time);
+		delayMicroseconds((unsigned int) ((float) delay_time_in_ms * 1000.0));
 	}
 
-	_previous_delay = delay_time;
+	_previous_delay = delay_time_in_ms;
+
+	#ifdef DEBUG_MOVEMENT_STEPS
+		Serial.print("Delayed ");
+		Serial.print(millis() - time_at_start);
+		Serial.println("milliseconds");
+	#endif
 }

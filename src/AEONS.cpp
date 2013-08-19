@@ -150,7 +150,7 @@ void loop()
 	manage_temperatures();
 	if(Serial.available())
 	{
-		Inactivity::instance().clear();
+		Inactivity::instance().restart();
 		get_next_command(Printer::instance().command, sizeof(Printer::instance().command));
 		code * code_recieved = gcode_factory();
 		if(code_recieved!=NULL)
@@ -188,7 +188,7 @@ void get_next_command(char * buffer, int buffer_length)
 	{
 		buffer[counter] = Serial.read();
 		#ifdef DEBUG_GCODE_PARSING
-			Serial.print(buffer[counter], " ");
+			Serial.print(buffer[counter]);
 		#endif
 		//stop us going TOO fast and reading before we have any more characters to read
 		delay(2);
@@ -272,8 +272,6 @@ code * gcode_factory()
 		Serial.print("Parsed gcode details:");
 		Serial.print("G-value: ");
 		Serial.println(g_value);
-		Serial.print("M-value: ");
-		Serial.println(M_value);
 	#endif
 
 	//Now we construct the correct Gcode object

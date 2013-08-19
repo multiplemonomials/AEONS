@@ -32,18 +32,28 @@ Inactivity & Inactivity::instance()
 
 -----------------------------------------------------------------------------*/
 Inactivity::Inactivity()
-	: last_activity_milliseconds(millis())
 {
+	// Start the timer.
+	restart();
 }
 
 
 /*-----------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------*/
-void Inactivity::clear()
+void Inactivity::restart()
 {
 	#if INACTIVITY_TIMEOUT_IN_SECONDS >= 1
-		last_activity_milliseconds = millis();
+		_last_activity_milliseconds = millis();
+		_deadline_milliseconds = _last_activity_milliseconds + ((unsigned long)INACTIVITY_TIMEOUT_IN_SECONDS * (unsigned long)1000);
+
+		#ifdef DEBUG_INACTIVITY
+			Serial.print("_last_activity_milliseconds = ");
+			Serial.println(_last_activity_milliseconds);
+
+			Serial.print("_deadline_milliseconds = ");
+			Serial.println(_deadline_milliseconds);
+		#endif
 	#endif
 }
 
@@ -56,17 +66,15 @@ void Inactivity::check()
 	#if INACTIVITY_TIMEOUT_IN_SECONDS >= 1
 
 		// Guard against millis() overflow (millis resets itself after about 50 days, and we don't want to crash)
-		if(last_activity_milliseconds > millis())
+		if(_last_activity_milliseconds > millis())
 		{
-			clear();
+			restart();
 			return;
 		}
 
 
 		// Return if inactivity timeout has not expired.
-		unsigned long const deadline_milliseconds(last_activity_milliseconds + (INACTIVITY_TIMEOUT_IN_SECONDS * 1000));
-
-		if(millis() < deadline_milliseconds)
+		if(millis() < _deadline_milliseconds)
 		{
 			return;
 		}
@@ -95,6 +103,8 @@ void Inactivity::check()
 		#ifdef TURN_OFF_POWER_SUPPLY_ON_SHUTDOWN
 			Printer::instance().Power_Supply.turn_off();
 		#endif
+
+		restart();
 
 	#endif
 }

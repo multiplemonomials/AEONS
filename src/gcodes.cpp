@@ -324,6 +324,26 @@ void M84::process()
 }
 
 /*-----------------------------------------------------------------------------
+M92 Set Steps Per MM
+-----------------------------------------------------------------------------*/
+
+M92::M92(char * command)
+{
+	x_value = get_value_from_char_array(command, 'X');
+	y_value = get_value_from_char_array(command, 'Y');
+	z_value = get_value_from_char_array(command, 'Z');
+	e_value = get_value_from_char_array(command, 'E');
+}
+
+void M92::process()
+{
+	Printer::instance().x_axis._steps_per_mm = x_value;
+	Printer::instance().y_axis._steps_per_mm = y_value;
+	Printer::instance().z_axis._steps_per_mm = z_value;
+	Printer::instance().e_axis._steps_per_mm = e_value;
+}
+
+/*-----------------------------------------------------------------------------
 M104 (Sxxx) Set extruder temperature to given temp
 If you have multiple extruders, it will set the temp for ONLY the current one!
 -----------------------------------------------------------------------------*/

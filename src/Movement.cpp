@@ -317,13 +317,8 @@ void Movement::calculate_delays()
 	_feedrate_mm_per_millisecond 	= _feedrate / (60.0 * 1000.0);
 	_move_time_in_ms				= _move_distance_in_mm / _feedrate_mm_per_millisecond;
 	_time_in_ms_per_loop			= _move_time_in_ms / _loops_to_do;
-
-	Serial.println("Starting Delay Calculation");
-
 	//_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
 	_delayer 						= new Delayer(_loops_to_do, _time_in_ms_per_loop);
-
-	Serial.println("Finished Delay Calculation");
 }
 
 
@@ -354,6 +349,7 @@ void Movement::print_debug_values()
 		DISPLAY_IT(_move_time_in_ms);
 		DISPLAY_IT(_move_distance_in_mm);
 		DISPLAY_IT(_feedrate);
+		DISPLAY_IT(_feedrate_mm_per_millisecond);
 		Serial.print("Calculation took: ");
 		Serial.println(calculation_time_millisconds);
 		#undef DISPLAY_IT
