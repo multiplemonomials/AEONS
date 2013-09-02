@@ -1,3 +1,4 @@
+
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
@@ -95,7 +96,7 @@
 //#define DEBUG_RAW_TEMP_VALUE 		//for creating your own thermistor table
 //#define DEBUG_GCODE_PROCESSING 	//are the sent gcodes being interpreted properly? SEVERE LAG MAY (or may not) ENSUE
 //#define DEBUG_GCODE_PARSING  		//debug serial reading and parsing.
-//#define DEBUG_MOVEMENT       		//debug movement calculation
+#define DEBUG_MOVEMENT       		//debug movement calculation
 //#define DEBUG_MOVEMENT_STEPS      //debug every single step
 #define RUN_UNIT_TESTS  			// Uncomment to run unit tests at startup.
 #define ACTUALLY_MOVE   			//does the printer move when told to?
@@ -108,7 +109,7 @@
 
 // Inverting axis direction
 #define INVERT_X_DIR true
-#define INVERT_Y_DIR false
+#define INVERT_Y_DIR true
 #define INVERT_Z_DIR false
 #define INVERT_E_DIR true
 
@@ -148,7 +149,8 @@
 //e.g. 4 would start going at 1/4 speed
 #define ACCEL_START_SPEED_MULTIPLIER 8
 
-#define MAX_ACCELERATION 15 // mm/s/s
+//do not set to 1
+#define MAX_ACCELERATION 2 // mm/s/s
 
 //misc settings:
 //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -164,7 +166,7 @@
 //#define DISABLE_AXES_AFTER_MOVE
 
 //enable the second extruder if your board supports it?
-#define ENABLE_SECOND_EXTRUDER
+//#define ENABLE_SECOND_EXTRUDER
 
 //does sending an M104 (set extruder temperature) affect both extruders of just the currently selected one?
 //#define M104_AFFECTS_ALL_EXTRUDERS

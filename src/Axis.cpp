@@ -96,18 +96,40 @@ void Axis::step()
 			return;
 		}
 		return;
+	#else
+		Serial.println("Not Moving");
 	#endif
 }
 
 void Axis::home()
 {
+	enable();
+
+	//no endstop? return
+	if(!_has_endstop)
+	{
+		return;
+	}
 	//set direction according to endstop location
 	set_positive_direction(!_endstop_at_MIN);
+	#ifdef DEBUG_MOVEMENT
+		Serial.print("Setting positive direction to ");
+		Serial.println(!_endstop_at_MIN);
+	#endif
 
 	// Calculate Delayer per mm of movement to achieve the stated feed rate.
-	float step_distance_in_mm           = 1/_steps_per_mm; //move distance == 1 step
+	float step_distance_in_mm           = 1.0/_steps_per_mm; //move distance == 1 step
 	float feedrate_us_per_mm 	= (60.0 * 1000.0 * 1000.0) / _homing_feedrate;
 	uint32_t step_time_in_us		= step_distance_in_mm * feedrate_us_per_mm;
+
+	#ifdef DEBUG_MOVEMENT
+		Serial.print("step_distance_in_mm = ");
+		Serial.println(step_distance_in_mm);
+		Serial.print("feedrate_us_per_mm = ");
+		Serial.println(feedrate_us_per_mm);
+		Serial.print("step_time_in_us = ");
+		Serial.println(step_time_in_us);
+	#endif
 
 	//keep going until we hit an endstop;
 	while(_endstop_pin_inverting?_endstop_pin.isActive():!_endstop_pin.isActive())

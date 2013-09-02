@@ -39,7 +39,7 @@ private:
 	float _previous_delay;
 
 	// Delay value returned at maximum print head speed.
-	float _min_delay;
+	float _min_delay_ms;
 
 	// Acceleration to use for current move.
 	double _max_accel_s_mm_s;
@@ -55,6 +55,8 @@ private:
 
 	// Number of operator() calls that bring us to the half-way point of the move.
 	uint16_t halfway_point;
+
+	float _max_accel_ms_mm_step;
 
 	// Move can be in one of three states:  Accelerating, steady-state at
 	// maximum spee, or decelerating.  The operator() function does different
@@ -73,7 +75,7 @@ private:
 public:
 
 	// Ctor.  Private since this object is always factory-built.
-	Delayer(uint32_t delayer_calls, float min_delay);
+	Delayer(uint32_t delayer_calls, float min_delay, double delay_sec_step);
 
 	// Call to provide the appropriate delay.
 	void operator ()();

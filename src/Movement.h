@@ -48,6 +48,7 @@ public:
 	float _feedrate_mm_per_millisecond;
 	float _move_time_in_ms;
 	float _time_in_ms_per_loop;
+	float _global_steps_per_mm;
 
 	uint32_t _calculation_time_millisconds;
 

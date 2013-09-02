@@ -35,10 +35,10 @@ TempInDegrees Heater::getTemperature()
 -----------------------------------------------------------------------------*/
 void Heater::setTemperature(TempInDegrees target)
 {
-//	#ifdef DEBUG_GCODE_PROCESSING
-//		Serial.print("Setting heater to ");
-//		Serial.println(target);
-//	#endif
+	#ifdef DEBUG_GCODE_PROCESSING
+		Serial.print("Setting heater to ");
+		Serial.println(target);
+	#endif
 	_target = target;
 	manage_temperature();
 }
@@ -98,7 +98,12 @@ void Heater::manage_temperature()
 	}
 	//check if we're at a higher temperature than the target	
 	if(_current - TEMPDELTA > _target)
+	{
 		digitalWrite(_power_pin, LOW);
+		#ifdef DEBUG_GCODE_PROCESSING
+			Serial.println("Too hot, decreasing temp...");
+		#endif
+	}
 		
 	//else we must be within the allowed delta of the target
 

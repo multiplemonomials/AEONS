@@ -147,6 +147,11 @@ void manage_temperatures()
 -----------------------------------------------------------------------------*/
 void loop()
 {
+
+//	if(Serial.available())
+//	{
+//		Serial.print(Serial.read());
+//	}
 	manage_temperatures();
 	if(Serial.available())
 	{
@@ -366,12 +371,14 @@ code * gcode_factory()
 			#ifdef HAS_EXTRUDER
 				case 0:
 					Printer::instance().e_axis = Printer::instance().e_axis_0;
+					Printer::instance().Extruder = Printer::instance().Extruder_1;
 					break;
 			#endif
 
 			#ifdef HAS_SECOND_EXTRUDER
 				case 1:
 					Printer::instance().e_axis = Printer::instance().e_axis_1;
+					Printer::instance().Extruder = Printer::instance().Extruder_2;
 					break;
 
 			#endif
@@ -467,7 +474,7 @@ void clear_command()
 -----------------------------------------------------------------------------*/
 unsigned int getCurrentExtruderTemperature()
 {
-	return &(Printer::instance().e_axis) == &(Printer::instance().e_axis_0) ? Printer::instance().Extruder.getTemperature() : Printer::instance().Extruder_2.getTemperature();
+	return Printer::instance().Extruder.getTemperature();
 }
 
 /*-----------------------------------------------------------------------------

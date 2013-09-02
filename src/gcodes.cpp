@@ -122,7 +122,13 @@ void G28::process()
 	// If no argument supplied, home all axes.
 	if((!test_for_char(_command, 'X')) && (!test_for_char(_command, 'Y')) && (!test_for_char(_command, 'Z')))
 	{
+		#ifdef DEBUG_GCODE_PROCESSING
+			Serial.println("Homing X...");
+		#endif
 		Printer::instance().x_axis.home();
+		#ifdef DEBUG_GCODE_PROCESSING
+			Serial.println("Homing Y...");
+		#endif
 		Printer::instance().y_axis.home();
 		Printer::instance().z_axis.home();
 		return;
@@ -366,11 +372,11 @@ M104::M104(char * command)
 void M104::process()
 {
 	#ifdef M104_AFFECTS_ALL_EXTRUDERS
-		Printer::instance().Extruder.setTemperature(s_value);
+		Printer::instance().Extruder_1.setTemperature(s_value);
 		Printer::instance().Extruder_2.setTemperature(s_value);
 	#else
 		#ifdef HAS_EXTRUDER
-			&(Printer::instance().e_axis) == &(Printer::instance().e_axis_0) ? Printer::instance().Extruder.setTemperature(s_value) : Printer::instance().Extruder_2.setTemperature(s_value);
+			Printer::instance().Extruder.setTemperature(s_value);
 		#endif
 	#endif
 }
@@ -502,11 +508,6 @@ void M116::process()
 					(Printer::instance().Extruder.getTemperature() <= (Printer::instance().Extruder.getTarget() + TEMPDELTA));
 		#endif
 
-		#ifdef HAS_EXTRUDER
-			extruder_up_to_temp =
-					(Printer::instance().Extruder_2.getTemperature() >= (Printer::instance().Extruder_2.getTarget() - TEMPDELTA)) &&
-					(Printer::instance().Extruder_2.getTemperature() <= (Printer::instance().Extruder_2.getTarget() + TEMPDELTA));
-		#endif
 
 		Serial.print("ok T:");
 		Serial.print(getCurrentExtruderTemperature());

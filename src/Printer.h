@@ -24,7 +24,8 @@ public:
 	#endif
 
 	#ifdef HAS_EXTRUDER
-	Heater Extruder;
+	Heater & Extruder;
+	Heater Extruder_1;
 	#endif
 
 	#ifdef HAS_SECOND_EXTRUDER
@@ -47,9 +48,12 @@ public:
 	Axis y_axis;
 	Axis z_axis;
 	Axis e_axis_0;
+	#ifdef HAS_SECOND_EXTRUDER
+		Axis e_axis_1;
+	#endif
 	Axis & e_axis; //warning about this should be OK, it is trying to compress a reference wich is uncompressible
 				   //the only way to fix this is to change the compiler command, not possible with the Arduino IDE
-	Axis e_axis_1;
+
 
 
 	char* m40_commands;

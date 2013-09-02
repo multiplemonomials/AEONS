@@ -86,6 +86,7 @@ Movement::Movement() :
 	_feedrate_mm_per_millisecond(0),
 	_move_time_in_ms(0),
 	_time_in_ms_per_loop(0),
+	_global_steps_per_mm(0),
 
 	_calculation_time_millisconds(0),
 
@@ -313,12 +314,15 @@ void Movement::update_endstop_clearances()
 void Movement::calculate_delays()
 {
 	// Calculate Delayer per mm of movement to achieve the stated feed rate.
-	_move_distance_in_mm 			= _x_target + _y_target + _z_target + _e_target;
+	// Is E a factor here?
+	_move_distance_in_mm 			= sqrt(pow(sqrt(pow(sqrt(pow(_x_target, 2) + pow(_y_target, 2)), 2) + pow(_z_target, 2)), 2) + pow(_e_target, 2));
 	_feedrate_mm_per_millisecond 	= _feedrate / (60.0 * 1000.0);
 	_move_time_in_ms				= _move_distance_in_mm / _feedrate_mm_per_millisecond;
 	_time_in_ms_per_loop			= _move_time_in_ms / _loops_to_do;
 	//_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
-	_delayer 						= new Delayer(_loops_to_do, _time_in_ms_per_loop);
+	_global_steps_per_mm			= (float)_loops_to_do/(float)_move_distance_in_mm;
+	double delay_sec_step 			= ((1.0/_feedrate_mm_per_millisecond)/1000.0)/_global_steps_per_mm;
+	_delayer 						= new Delayer(_loops_to_do, _time_in_ms_per_loop, delay_sec_step);
 }
 
 
@@ -348,6 +352,7 @@ void Movement::print_debug_values()
 		DISPLAY_IT(_e_target);
 		DISPLAY_IT(_move_time_in_ms);
 		DISPLAY_IT(_move_distance_in_mm);
+		DISPLAY_IT(_global_steps_per_mm);
 		DISPLAY_IT(_feedrate);
 		DISPLAY_IT(_feedrate_mm_per_millisecond);
 		Serial.print("Calculation took: ");
