@@ -152,6 +152,9 @@
 //do not set to 1
 #define MAX_ACCELERATION 2 // mm/s/s
 
+//move in relative mode by default
+#define RELATIVE_MODE_BY_DEFAULT
+
 //misc settings:
 //-------------------------------------------------------------------------------------------------------------------------------------------
 //check the endstop state while we're moving, or rely on software endstops?  May increase maximum speed.

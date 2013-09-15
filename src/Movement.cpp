@@ -316,13 +316,12 @@ void Movement::calculate_delays()
 	// Calculate Delayer per mm of movement to achieve the stated feed rate.
 	// Is E a factor here?
 	_move_distance_in_mm 			= sqrt(pow(sqrt(pow(sqrt(pow(_x_target, 2) + pow(_y_target, 2)), 2) + pow(_z_target, 2)), 2) + pow(_e_target, 2));
-	_feedrate_mm_per_millisecond 	= _feedrate / (60.0 * 1000.0);
+	_feedrate_mm_per_millisecond 	= _feedrate / 60000.0;
 	_move_time_in_ms				= _move_distance_in_mm / _feedrate_mm_per_millisecond;
 	_time_in_ms_per_loop			= _move_time_in_ms / _loops_to_do;
-	//_delayer 						= Delayer::factory(_time_in_ms_per_loop, _loops_to_do);
 	_global_steps_per_mm			= (float)_loops_to_do/(float)_move_distance_in_mm;
-	double delay_sec_step 			= ((1.0/_feedrate_mm_per_millisecond)/1000.0)/_global_steps_per_mm;
-	_delayer 						= new Delayer(_loops_to_do, _time_in_ms_per_loop, delay_sec_step);
+	float delay_seconds_per_step 	= ((1.0/_feedrate_mm_per_millisecond)/1000.0)/_global_steps_per_mm;
+	_delayer 						= new Delayer(_loops_to_do, _time_in_ms_per_loop, delay_seconds_per_step);
 }
 
 

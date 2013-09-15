@@ -42,7 +42,7 @@ private:
 	float _min_delay_ms;
 
 	// Acceleration to use for current move.
-	double _max_accel_s_mm_s;
+	float _max_accel_s_mm_s;
 
 	// The number of times the delay function has been called so far.
 	uint16_t delayer_calls_so_far;
@@ -75,7 +75,7 @@ private:
 public:
 
 	// Ctor.  Private since this object is always factory-built.
-	Delayer(uint32_t delayer_calls, float min_delay, double delay_sec_step);
+	Delayer(uint32_t delayer_calls, float min_delay, float delay_sec_step);
 
 	// Call to provide the appropriate delay.
 	void operator ()();

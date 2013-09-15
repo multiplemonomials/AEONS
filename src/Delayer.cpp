@@ -14,7 +14,7 @@
 #include "AEONS_Config.h"
 
 
-	Delayer::Delayer(uint32_t delayer_calls, float min_delay_ms, double delay_sec_step)
+	Delayer::Delayer(uint32_t delayer_calls, float min_delay_ms, float delay_seconds_per_step)
  	:	_previous_delay(min_delay_ms * (float)ACCEL_START_SPEED_MULTIPLIER),
  	_min_delay_ms(min_delay_ms),
  	delayer_calls_so_far(1),
@@ -41,7 +41,7 @@
 	float max_accel_ms_mm_s = _max_accel_s_mm_s * 1000.0;
 
 	// Convert to per-step metrics.
-	_max_accel_ms_mm_step = max_accel_ms_mm_s * delay_sec_step;
+	_max_accel_ms_mm_step = max_accel_ms_mm_s * delay_seconds_per_step;
 
 
 	#ifdef DEBUG_MOVEMENT
@@ -54,8 +54,8 @@
 		Serial.print("_max_accel_ms_mm_step: ");
 		Serial.print(_max_accel_ms_mm_step);
 		Serial.print("\n");
-		Serial.print("delay_sec_step: ");
-		Serial.print(delay_sec_step);
+		Serial.print("delay_seconds_per_step: ");
+		Serial.print(delay_seconds_per_step);
 		Serial.print("\n");
 		Serial.print("Previous Delay: ");
 		Serial.print(_previous_delay);

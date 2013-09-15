@@ -86,7 +86,11 @@ Printer::Printer()
 	//MAKE SURE IT ENDS WITH \0!!!
 	/* EXAMPLE:*/m40_commands = (char*) "M140 S5 \n G1 Y200 F2000 \0";
 
-	relative_mode = false;
+	#ifdef RELATIVE_MODE_BY_DEFAULT
+		relative_mode = true;
+	#else
+		relative_mode = false;
+	#endif
 
 	last_feedrate = 100;
 

@@ -86,6 +86,12 @@ void G1::process()
 		movement.calculate_values();
 		movement.execute();
 	}
+	else
+	{
+		#ifdef DEBUG_MOVEMENT
+			Serial.println("Movement is not valid (no change in position)");
+		#endif
+	}
 }
 
 /*-----------------------------------------------------------------------------
