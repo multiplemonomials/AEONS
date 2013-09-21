@@ -111,7 +111,7 @@
 #define INVERT_X_DIR true
 #define INVERT_Y_DIR true
 #define INVERT_Z_DIR false
-#define INVERT_E_DIR true
+#define INVERT_E_DIR false
 
 // For Inverting Stepper Enable Pins (Active Low) use 1 (e.g. polulu), Non Inverting (Active High) use 0
 #define ENABLE_PINS_INVERTING 1
@@ -123,7 +123,7 @@
 #define X_STEPS_PER_MM 52.603
 #define Y_STEPS_PER_MM 105.678
 #define Z_STEPS_PER_MM 2267.567
-#define E_STEPS_PER_MM 483.791
+#define E_STEPS_PER_MM 705.646
 
 //feedrate limits for axes--defaults should be OK for most people
 #define XY_AXES_MAX_FEEDRATE 18000

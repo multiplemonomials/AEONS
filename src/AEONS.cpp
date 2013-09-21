@@ -13,6 +13,7 @@ Implemented Codes
 	Gcode:
 	G0  -> G1
 	G1  - Coordinated Movement X Y Z E
+	G4  - Dwell S<seconds> or P<milliseconds>
 	G28 - Home all Axis
 	G90 - Use Absolute Coordinates
 	G91 - Use Relative Coordinates
@@ -36,7 +37,6 @@ Implemented Codes
 
 To Be Implemented
 -------------------
-	G4  - Dwell S<seconds> or P<milliseconds>
 
 	RepRap M Codes
 
@@ -288,6 +288,9 @@ code * gcode_factory()
 			case 0:
 			case 1:
 				return new G1(Printer::instance().command);
+				break;
+			case 4:
+				return new G4(Printer::instance().command);
 				break;
 			case 28:
 				return new G28(Printer::instance().command);
