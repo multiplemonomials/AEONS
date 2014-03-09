@@ -1,0 +1,8 @@
+.settings
+Core
+Debug
+arduino-lib
+.cproject
+.project
+libCoreMega2560.a
+Overview.ucls

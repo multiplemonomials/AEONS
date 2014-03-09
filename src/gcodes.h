@@ -13,6 +13,7 @@
 #include "Printer.h"
 #include "AEONS.h"
 #include "Movement.h"
+#include "Parser.h"
 
 /*-----------------------------------------------------------------------------
 G1--Linear Move
@@ -232,6 +233,20 @@ struct M107 : code
 	void process();
 
 	virtual ~M107(){}
+};
+
+/*-----------------------------------------------------------------------------
+M107 Wait for Extruder Temperature
+-----------------------------------------------------------------------------*/
+struct M109 : code
+{
+	TempInDegrees s_value;
+
+	M109(char * command);
+
+	void process();
+
+	virtual ~M109(){}
 };
 
 /*------------------------------------------------------------------------------------

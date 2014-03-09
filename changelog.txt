@@ -16,7 +16,7 @@ O Runtime config
 
 O M109 and M190
 
-O G4
+X G4
 
 KNOWN ISSUES/MISSING FEATURES:
 ----------------------------------------------------------------------

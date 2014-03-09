@@ -11,54 +11,43 @@
 -----------------------------------------------------------------------------*/
 
 G1::G1(char * command)
-{	if(Printer::instance().relative_mode)
+{
+	//with a G1 command, if an axis is not included in the command, that axis shouldn't move.
+	//if we're in relative mode, that axis should move 0.
+	//if we're in absolute mode, that axis should move to is current position
+	//the trouble is that, in absolute mode, "G1 X0 Y10" is different from "G1 Y10"
+
+	x_value = find_double_in_command(command, 'X');
+	y_value = find_double_in_command(command, 'Y');
+	z_value = find_double_in_command(command, 'Z');
+	e_value = find_double_in_command(command, 'E');
+	f_value = find_double_in_command(command, 'F');
+	if(!Printer::instance().relative_mode)
 	{
-		if(!get_value_from_char_array_bool(command, 'X', &x_value)) //sees if we got an X value to move to as well as initializing x_value
+		if(test_for_char(command, 'X'))
 		{
-			x_value = 0.0;
-		}
-		if(!get_value_from_char_array_bool(command, 'Y', &y_value))
-		{
-			y_value = 0.0;
-		}
-		if(!get_value_from_char_array_bool(command, 'Z', &z_value))
-		{
-			z_value = 0.0;
-		}
-		if(!get_value_from_char_array_bool(command, 'E', &e_value))
-		{
-			e_value = 0.0;
-		}
-	}
-	else
-	{
-		// Parse the command and extract parameters if present.
-		// If we didn't recieve an argument, "move" to the current position
-		if(!get_value_from_char_array_bool(command, 'X', &x_value))
-		{
-			x_value = Printer::instance().x_axis._current_position;
+			x_value = Printer::instance().x_axis.getCurrentPosition();
 		}
 
-		if(!get_value_from_char_array_bool(command, 'Y', &y_value))
+		if(test_for_char(command, 'Y'))
 		{
-			y_value = Printer::instance().y_axis._current_position;
+			y_value = Printer::instance().y_axis.getCurrentPosition();
 		}
 
-		if(!get_value_from_char_array_bool(command, 'Z', &z_value))
+		if(test_for_char(command, 'Z'))
 		{
-			z_value = Printer::instance().z_axis._current_position;
+			z_value = Printer::instance().z_axis.getCurrentPosition();
 		}
 
-		if(!get_value_from_char_array_bool(command, 'E', &e_value))
+		if(test_for_char(command, 'E'))
 		{
-			e_value = Printer::instance().e_axis._current_position;
+			e_value = Printer::instance().e_axis.getCurrentPosition();
 		}
 	}
 
-	// Zero returned if F not supplied in command.
-	if (!get_value_from_char_array_bool(command, 'F', &f_value))
+	if(f_value == 0)
 	{
-		//an f value was not included in the command, so use the last provided one
+		//an f value was not included in the command (or was 0), so use the last provided one
 		f_value = Printer::instance().last_feedrate;
 	}
 }
@@ -100,7 +89,7 @@ G4 Delay Pxxx Milliseconds
 G4::G4(char * command)
 {
 	_command = command;
-	p_value = (int)get_value_from_char_array(command, 'P');
+	p_value = (int)find_double_in_command(command, 'P');
 }
 
 /*-----------------------------------------------------------------------------
@@ -190,10 +179,27 @@ G92 Set position
 G92::G92(char * command)
 {
 	//read arguments from command
-	has_x_value = get_value_from_char_array_bool(command, 'X', &x_value);
-	has_y_value = get_value_from_char_array_bool(command, 'Y', &y_value);
-	has_z_value = get_value_from_char_array_bool(command, 'Z', &z_value);
-	has_e_value = get_value_from_char_array_bool(command, 'E', &e_value);
+	has_x_value = test_for_char(command, 'X');
+	has_y_value = test_for_char(command, 'X');
+	has_z_value = test_for_char(command, 'X');
+	has_e_value = test_for_char(command, 'X');
+
+	if(has_x_value)
+	{
+		x_value = find_double_in_command(command, 'X');
+	}
+	if(has_y_value)
+	{
+		y_value = find_double_in_command(command, 'Y');
+	}
+	if(has_z_value)
+	{
+		z_value = find_double_in_command(command, 'Z');
+	}
+	if(has_e_value)
+	{
+		e_value = find_double_in_command(command, 'E');
+	}
 }
 
 void G92::process()
@@ -269,9 +275,11 @@ void M40::process()
 				if (code_to_process != 0)
 					code_to_process->process();
 
-				clear_command();
+				clear_command(Printer::instance().command);
+				delete code_to_process;
 		}
 
+		//reached end of command
 		//the for loop SHOULD stop before this triggers but it's here just in case
 		else if(Printer::instance().m40_commands[counter] == '\0')
 		{
@@ -324,7 +332,7 @@ M84 Disable Motors
 
 M84::M84(char * command)
 {
-	_wait_time = get_value_from_char_array(command, 'S');
+	_wait_time = find_double_in_command(command, 'S');
 }
 
 void M84::process()
@@ -341,10 +349,10 @@ M92 Set Steps Per MM
 
 M92::M92(char * command)
 {
-	x_value = get_value_from_char_array(command, 'X');
-	y_value = get_value_from_char_array(command, 'Y');
-	z_value = get_value_from_char_array(command, 'Z');
-	e_value = get_value_from_char_array(command, 'E');
+	x_value = find_double_in_command(command, 'X');
+	y_value = find_double_in_command(command, 'Y');
+	z_value = find_double_in_command(command, 'Z');
+	e_value = find_double_in_command(command, 'E');
 }
 
 void M92::process()
@@ -362,7 +370,7 @@ If you have multiple extruders, it will set the temp for ONLY the current one!
 
 M104::M104(char * command)
 {
-	s_value =(int) get_value_from_char_array(command, 'S');
+	s_value =(int) find_double_in_command(command, 'S');
 
 	#ifdef DEBUG_GCODE_PROCESSING
 		if(s_value == 0)
@@ -445,6 +453,23 @@ void M107::process()
 }
 
 /*-----------------------------------------------------------------------------
+M107 Wait for Extruder Tempurature
+-----------------------------------------------------------------------------*/
+
+M109::M109(char * command)
+{
+	s_value =(int) find_double_in_command(command, 'S');
+}
+
+void M109::process()
+{
+	#ifdef HAS_EXTRUDER
+		Printer::instance().Extruder.setTemperature(s_value);
+		//while(Printer::instance().Extruder.getTemperature() )
+	#endif
+}
+
+/*-----------------------------------------------------------------------------
 M114 - Report assumed postion to host
 -----------------------------------------------------------------------------*/
 
@@ -474,8 +499,8 @@ M116 [Ssss] [Pppp]-- Wait for extruder and bed to heat up (can specify temps for
 M116::M116(char * command)
 {
 	//user can optionally set temp values
-	s_value =(int) get_value_from_char_array(command, 'S');
-	p_value =(int) get_value_from_char_array(command, 'P');
+	s_value =(int) find_double_in_command(command, 'S');
+	p_value =(int) find_double_in_command(command, 'P');
 
 
 }
@@ -540,7 +565,7 @@ M140 <Ssss>--Set bed temperature to given temp
 
 M140::M140(char * command)
 {
-	s_value =(int) get_value_from_char_array(Printer::instance().command, 'S');
+	s_value =(int) find_double_in_command(Printer::instance().command, 'S');
 
 	if(s_value == 0)
 	{
@@ -571,25 +596,25 @@ M201::M201(char * command)
 {
 	//keep searching the possible arguments until we find one that is not zero
 
-	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'X');
+	acceleration_value = find_long_in_command(Printer::instance().command, 'X');
 	if(acceleration_value != 0)
 	{
 		return;
 	}
 
-	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'Y');
+	acceleration_value = find_long_in_command(Printer::instance().command, 'Y');
 	if(acceleration_value != 0)
 	{
 		return;
 	}
 
-	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'Z');
+	acceleration_value = find_long_in_command(Printer::instance().command, 'Z');
 	if(acceleration_value != 0)
 	{
 		return;
 	}
 
-	acceleration_value = (int) get_value_from_char_array(Printer::instance().command, 'E');
+	acceleration_value = find_long_in_command(Printer::instance().command, 'E');
 	if(acceleration_value != 0)
 	{
 		return;
@@ -603,7 +628,7 @@ void M201::process()
 	if((acceleration_value == 0) || (acceleration_value == 1))
 	{
 		//we didn't get anything
-		//1 is the kryptonite of our acceleration algorythm, as 1-(1/1) = 0
+		//1 is the kryptonite of our acceleration algorithm, as 1-(1/1) = 0
 		return;
 	}
 

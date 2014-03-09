@@ -68,17 +68,13 @@ To Be Implemented
 #include "assert.h"
 #include "UnitTest.h"
 #include "Inactivity.h"
+#include <assert.h>
+#include "Parser.h"
 
 
 /*-----------------------------------------------------------------------------
 	Global variables.
 -----------------------------------------------------------------------------*/
-
-int current_x_position = 0;
-int current_y_position = 0;
-int current_z_position = 0;
-int current_e_position = 0;
-int current_f_position = 0;
 
 //last line number
 long line_number = 0;
@@ -98,10 +94,7 @@ void setup()
 	//create and init device objects
 	//which set up their own pins
 
-	//initialize pins
-	init_pins();
-
-	//init Priinter object
+	//init Printer object
 	Printer::instance();
 
 	//init inactivity timer
@@ -111,19 +104,6 @@ void setup()
 	// Invoke unit tests
 	TestAll();
 	#endif
-
-	//Debugging stuff
-//	Serial.println("Stepping Z-Axis");
-//	Printer::instance().x_axis.enable();
-//	Printer::instance().y_axis.enable();
-//	Printer::instance().z_axis.enable();
-//	Printer::instance().e_axis.enable();
-//
-//	while(true)
-//	{
-//		Printer::instance().z_axis.step();
-//		Delayer(1);
-//	}
 }
 
 /*-----------------------------------------------------------------------------
@@ -147,25 +127,23 @@ void manage_temperatures()
 -----------------------------------------------------------------------------*/
 void loop()
 {
-
-//	if(Serial.available())
-//	{
-//		Serial.print(Serial.read());
-//	}
 	manage_temperatures();
 	if(Serial.available())
 	{
+		//Received a command, reset inactivity timer
 		Inactivity::instance().restart();
+
+		//read command from serial and put into Printer::instance().command
 		get_next_command(Printer::instance().command, sizeof(Printer::instance().command));
 		code * code_recieved = gcode_factory();
 		if(code_recieved!=NULL)
 		{
 		//call the code object's process function and then free it from memory
 			code_recieved->process();
-			delete(code_recieved);
+			delete code_recieved;
 		}
 
-		clear_command();
+		clear_command(Printer::instance().command);
 	}
 	Inactivity::instance().check();
 }
@@ -191,12 +169,16 @@ void get_next_command(char * buffer, int buffer_length)
 
 	do
 	{
+		if(counter >= buffer_length)
+		{
+			Serial.println("!! ERROR: Gcode buffer overflow.  Aborting program.");
+			abort();
+		}
+
 		buffer[counter] = Serial.read();
 		#ifdef DEBUG_GCODE_PARSING
 			Serial.print(buffer[counter]);
 		#endif
-		//stop us going TOO fast and reading before we have any more characters to read
-		delay(2);
 	}
 	while (buffer[counter++] != '\n');
 
@@ -235,48 +217,56 @@ bool verify(int n_value, int checksum_from_command, char* command)
 }
 
 /*-----------------------------------------------------------------------------
-Reads one command from Printer.command and returns a code object of the correct type
-and with the correct data.
+Reads the command from Printer::instance().command and returns a code object of
+the correct type and with the correct data.
 -----------------------------------------------------------------------------*/
 code * gcode_factory()
 {
 
-	// Get next GCode command.
-
-	fix_comments(Printer::instance().command);
+	remove_comments(Printer::instance().command);
 
 	//next part sets variables to attributes of the recieved code
-	//cast here should be OK since mcodes and gcodes are never decimals
-	float g_value_temp_float;
-	bool has_g_value = get_value_from_char_array_bool(Printer::instance().command, 'G', &g_value_temp_float);
-	int g_value = (int) g_value_temp_float;
 
+	bool has_g_value = test_for_char(Printer::instance().command, 'G');
 
-		bool has_m_value;
-		int m_value = (int)get_value_from_char_array(Printer::instance().command, 'M');
-		if(m_value != 0.0)
-		{
-			has_m_value = true;
-		}
+	int g_value;
+	if(has_g_value)
+	{
+		g_value = find_long_in_command(Printer::instance().command, 'G');
+	}
+
+	bool has_m_value = test_for_char(Printer::instance().command, 'M');
+
+	int m_value;
+	if(has_g_value)
+	{
+		m_value = find_long_in_command(Printer::instance().command, 'M');
+	}
+
+	bool has_t_value = test_for_char(Printer::instance().command, 'T');
+
+	int t_value;
+	if(has_t_value)
+	{
+		t_value = find_long_in_command(Printer::instance().command, 'T');
+	}
+
 
 	#ifdef VERIFY_GCODES
-	int n_value = (int) get_value_from_char_array(Printer::instance().command, 'N');
+	int n_value = find_long_in_command(Printer::instance().command, 'N');
 	#endif
 
-	if(!(has_g_value || has_m_value))
+	if(!(has_g_value || has_m_value || has_t_value))
 		Serial.println("Error! Neither a g-value or an m-value were recieved!");
 
 	#ifdef VERIFY_GCODES
-		if(!verify(n_value, (int) get_value_from_char_array(Printer::instance().command, '*'), Printer::instance().command))
-		{
-			return NULL; //if we're here the gcode is corrupt
-		}
-	#endif
-
-	#ifdef DEBUG_GCODE_PARSING
-		Serial.print("Parsed gcode details:");
-		Serial.print("G-value: ");
-		Serial.println(g_value);
+	if(!verify(n_value, (int) find_double_in_command(Printer::instance().command, '*'), Printer::instance().command))
+	{
+		Serial.print("ERROR: Corrupt gcode \"");
+		Serial.print(Printer::instance().command);
+		Serial.println("\".  Checksum mismatch.");
+		return NULL;
+	}
 	#endif
 
 	//Now we construct the correct Gcode object
@@ -362,13 +352,12 @@ code * gcode_factory()
 				break;
 		}
 	}
-	float t_value;
 
-	if(get_value_from_char_array_bool(Printer::instance().command, 'T', &t_value))
+	if(has_t_value)
 	{
-		//we're changing the extruder to extruder t_value]
+		//we're changing the extruder to extruder t_value
 		//starts at extruder 0
-		switch((uint16_t)t_value)
+		switch(t_value)
 		{
 			//default extruder
 			#ifdef HAS_EXTRUDER
@@ -397,78 +386,6 @@ code * gcode_factory()
 
 	Serial.println("ERROR: Gcode not found");
 	return NULL;
-}
-
-/*-----------------------------------------------------------------------------
-	Returns 0.0 if the specified character is not found in the char[]
-	Otherwise returns the number that comes after target in code
------------------------------------------------------------------------------*/
-double get_value_from_char_array(char * code, char target)
-{
-	char * pointer_to_target = strchr(code, target);
-
-	if (pointer_to_target == 0)
-	{
-		return 0;
-	}
-
-	char * end_ptr; // strtod returns a double (and a char*) from a char*
-	double code_value = strtod((pointer_to_target + 1), &end_ptr);
-
-	return code_value;
-}
-
-/*-----------------------------------------------------------------------------
-	Returns false if the specified character is not found in the char[].
-	This one is used by functions where an argument of 0 is different from
-	no argument at all, pretty much just G1 and G92.
------------------------------------------------------------------------------*/
-bool get_value_from_char_array_bool(char * code, char target, float * return_value)
-{
-	char * pointer_to_target = strchr(code, target);
-
-	if (pointer_to_target == 0)
-	{
-		*return_value = 0;
-		return false;
-	}
-
-	char * end_ptr; // strtod returns a double (and a char*) from a char*
-	*return_value = static_cast<float>(strtod((pointer_to_target + 1), &end_ptr));
-
-	return true;
-}
-
-/*-----------------------------------------------------------------------------
-	Returns false if the specified character is not found in the char[].
------------------------------------------------------------------------------*/
-bool test_for_char(char * code, char target)
-{
-	char * pointer_to_target = strchr(code, target);
-
-	return pointer_to_target != 0;
-}
-
-/*-----------------------------------------------------------------------------
------------------------------------------------------------------------------*/
-void fix_comments(char * command)
-{
-	// Find comment delimiter if any.
-	char * semicolon_ptr = 	strchr(command, ';');
-
-	// Truncate command at semicolon.
-	if (semicolon_ptr != 0)
-	{
-		*semicolon_ptr = '\0';
-	}
-}
-
-/*-----------------------------------------------------------------------------
-Null-terminates command
------------------------------------------------------------------------------*/
-void clear_command()
-{
-		Printer::instance().command[0] = '\0';
 }
 
 /*-----------------------------------------------------------------------------
