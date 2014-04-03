@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "Heater.h"
+#include <Arduino.h>
 
 
 /*-----------------------------------------------------------------------------
@@ -100,9 +101,6 @@ void Heater::manage_temperature()
 	if(_current - TEMPDELTA > _target)
 	{
 		digitalWrite(_power_pin, LOW);
-		#ifdef DEBUG_GCODE_PROCESSING
-			Serial.println("Too hot, decreasing temp...");
-		#endif
 	}
 		
 	//else we must be within the allowed delta of the target

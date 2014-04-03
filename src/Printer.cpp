@@ -5,12 +5,6 @@
 -----------------------------------------------------------------------------*/
 #include "Printer.h"
 
-/*-----------------------------------------------------------------------------
-	Instance variable of this singleton object.
------------------------------------------------------------------------------*/
-
-Printer * Printer::_instance = 0;
-
 
 /*-----------------------------------------------------------------------------
 	Ctor.
@@ -84,7 +78,7 @@ Printer::Printer()
 
 	//Set the custom commands to run when an M40 is recieved.
 	//MAKE SURE IT ENDS WITH \0!!!
-	/* EXAMPLE:*/m40_commands = (char*) "M140 S5 \n G1 Y200 F2000 \0";
+	/* EXAMPLE:*/m40_commands = "M140 S5 \n G1 Y200 F2000 \0";
 
 	#ifdef RELATIVE_MODE_BY_DEFAULT
 		relative_mode = true;
@@ -103,16 +97,10 @@ Printer::Printer()
 -----------------------------------------------------------------------------*/
 Printer & Printer::instance()
 {
-	if (_instance == 0)
-	{
-		_instance = new Printer();
-	}
+	//will be created on first use
+	static Printer printer;
 	
-	return *_instance;
+	return printer;
 }
-
-
-
-//Printer::instance().fan.turn_on();
 
 

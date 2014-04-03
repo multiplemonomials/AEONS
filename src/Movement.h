@@ -27,6 +27,11 @@ public:
 	float _e_target;
 	float _feedrate;
 
+	bool _x_positive_direction;
+	bool _y_positive_direction;
+	bool _z_positive_direction;
+	bool _e_positive_direction;
+
 	StepCount _total_x_steps;
 	StepCount _total_y_steps;
 	StepCount _total_z_steps;

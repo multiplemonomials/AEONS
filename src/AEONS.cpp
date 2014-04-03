@@ -82,8 +82,6 @@ long line_number = 0;
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
 
-extern "C" void __cxa_pure_virtual() {}
-
 void setup()
 {
 
@@ -172,6 +170,8 @@ void get_next_command(char * buffer, int buffer_length)
 		if(counter >= buffer_length)
 		{
 			Serial.println("!! ERROR: Gcode buffer overflow.  Aborting program.");
+			//needed to not cut off error message
+			delay(1);
 			abort();
 		}
 
@@ -238,7 +238,7 @@ code * gcode_factory()
 	bool has_m_value = test_for_char(Printer::instance().command, 'M');
 
 	int m_value;
-	if(has_g_value)
+	if(has_m_value)
 	{
 		m_value = find_long_in_command(Printer::instance().command, 'M');
 	}

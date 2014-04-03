@@ -53,7 +53,7 @@
 #define THERMISTORBED 1
 
 // This determines the communication speed of the printer
-#define BAUDRATE 9600
+#define BAUDRATE 250000
 
 //// ADVANCED SETTINGS - to tweak thermistor temps:
 #include "thermistortables.h"
@@ -95,7 +95,7 @@
 // Comment these out (using // at the start of the line)
 //#define DEBUG_RAW_TEMP_VALUE 		//for creating your own thermistor table
 //#define DEBUG_GCODE_PROCESSING 	//are the sent gcodes being interpreted properly? SEVERE LAG MAY (or may not) ENSUE
-//#define DEBUG_GCODE_PARSING  		//debug serial reading and parsing.
+#define DEBUG_GCODE_PARSING  		//debug serial reading and parsing.
 #define DEBUG_MOVEMENT       		//debug movement calculation
 //#define DEBUG_MOVEMENT_STEPS      //debug every single step
 #define RUN_UNIT_TESTS  			// Uncomment to run unit tests at startup.
@@ -142,7 +142,6 @@
 #define Z_ENDSTOP_INVERT true
 
 //disable acceleration
-//won't really make it go any faster
 //#define ACCELERATION_KILL
 
 //fraction of the normal speed to start accelerating at
@@ -175,11 +174,11 @@
 //#define M104_AFFECTS_ALL_EXTRUDERS
 
 //inactivity timeout, in SECONDS
-//it will update the inactivity timout when anything comes over the serial line.
+//it will update the inactivity timeout when anything comes over the serial line.
 //set to 0 to disable
 #define INACTIVITY_TIMEOUT_IN_SECONDS 2700 //45 minutes
 
-//what to do when the inactivity timmeout is reached?
+//what to do when the inactivity timeout is reached?
 //you may uncomment more than one
 #define WARN_HOST_ON_SHUTDOWN //print a message to the host saying the printer is shutting down now
 #define SET_TEMPS_TO_0_ON_SHUTDOWN

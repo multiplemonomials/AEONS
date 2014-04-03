@@ -10,6 +10,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <Arduino.h>
+
+#include "AEONS_Config.h"
 
 bool verify(int n_value, int checksum_from_command, char* command);
 

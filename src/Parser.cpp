@@ -40,7 +40,15 @@ long find_long_in_command(char * code, char target)
 	}
 
 	char * end_ptr; // strtod returns a double (and a char*) from a char*
-	double code_value = strtoul((pointer_to_target + 1), &end_ptr, 10);
+	long code_value = strtoul((pointer_to_target + 1), &end_ptr, 10);
+
+#ifdef DEBUG_GCODE_PARSING
+	Serial.print(target);
+	Serial.print("-value was ");
+	Serial.print(code_value);
+	Serial.print(" in command ");
+	Serial.println(code);
+#endif
 
 	return code_value;
 }
@@ -51,6 +59,13 @@ long find_long_in_command(char * code, char target)
 bool test_for_char(char * code, char target)
 {
 	char * pointer_to_target = strchr(code, target);
+
+#ifdef DEBUG_GCODE_PARSING
+	Serial.print(pointer_to_target != 0 ? "Found " : "Didn't find ");
+	Serial.print(target);
+	Serial.print(" in command ");
+	Serial.println(code);
+#endif
 
 	return pointer_to_target != 0;
 }

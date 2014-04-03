@@ -66,9 +66,6 @@ void G1::process()
 	}
 
 
-	//void move(float x_target, float y_target, float z_target, float e_target, int feedrate, bool absolute_mode)
-//	move(x_value, y_value, z_value, e_value, f_value);
-
 	Movement movement(x_value, y_value, z_value, e_value, f_value);
 	if(movement.is_valid())
 	{
@@ -78,7 +75,7 @@ void G1::process()
 	else
 	{
 		#ifdef DEBUG_MOVEMENT
-			Serial.println("Movement is not valid (no change in position)");
+			Serial.println("ERROR: Movement is not valid (no change in position)");
 		#endif
 	}
 }
@@ -180,9 +177,9 @@ G92::G92(char * command)
 {
 	//read arguments from command
 	has_x_value = test_for_char(command, 'X');
-	has_y_value = test_for_char(command, 'X');
-	has_z_value = test_for_char(command, 'X');
-	has_e_value = test_for_char(command, 'X');
+	has_y_value = test_for_char(command, 'Y');
+	has_z_value = test_for_char(command, 'Z');
+	has_e_value = test_for_char(command, 'E');
 
 	if(has_x_value)
 	{
@@ -406,13 +403,14 @@ M105::M105(char * command)
 
 void M105::process()
 {
+	Serial.print("ok\n");
 	#ifdef HAS_EXTRUDER
-		Serial.print("ok\n T:");
+		Serial.print("T:");
 		Serial.print(getCurrentExtruderTemperature());
 	#endif
 	#ifdef HAS_BED
 		Serial.print(" B:");
-		Serial.println(Printer::instance().Bed.getTemperature());
+		Serial.print(Printer::instance().Bed.getTemperature());
 	#endif
 
 		Serial.print('\n');

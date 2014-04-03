@@ -51,12 +51,9 @@ public:
 	#ifdef HAS_SECOND_EXTRUDER
 		Axis e_axis_1;
 	#endif
-	Axis & e_axis; //warning about this should be OK, it is trying to compress a reference wich is uncompressible
-				   //the only way to fix this is to change the compiler command, not possible with the Arduino IDE
+	Axis & e_axis;
 
-
-
-	char* m40_commands;
+	const char* m40_commands;
 
 	//holds the input gcode
 	char command [MAX_GCODE_LENGTH];
@@ -69,10 +66,6 @@ public:
 
 	
 private:
-
-	// Pointer to singleton instance.
-	static Printer * _instance;
-
 
 	// Ctor.  Private in this singleton object.
 	Printer();

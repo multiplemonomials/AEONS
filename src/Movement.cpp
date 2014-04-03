@@ -40,6 +40,7 @@ Movement::Movement(float x_target, float y_target, float z_target, float e_targe
 	_feedrate_mm_per_millisecond(0),
 	_move_time_in_ms(0),
 	_time_in_ms_per_loop(0),
+	_global_steps_per_mm(0),
 
 	_calculation_time_millisconds(0),
 
@@ -60,6 +61,11 @@ Movement::Movement() :
 	_z_target(0),
 	_e_target(0),
 	_feedrate(0),
+
+	_x_positive_direction(false),
+	_y_positive_direction(false),
+	_z_positive_direction(false),
+	_e_positive_direction(false),
 
 	_total_x_steps(0),
 	_total_y_steps(0),
@@ -479,15 +485,15 @@ uint16_t Movement::LCM(unsigned int x_val, unsigned int y_val, unsigned int z_va
 	unsigned int LCM_of_z_and_e = (multiply_no_0(z_val, e_val)) / GCD(z_val, e_val); //1/1
 	unsigned int final_LCM 		= (multiply_no_0(LCM_of_x_and_y, LCM_of_z_and_e)) / GCD(LCM_of_x_and_y, LCM_of_z_and_e);
 
-#if 0
+#if 1
 	Serial.println("LCM: ");
 	Serial.println(LCM_of_x_and_y);
 	Serial.println(LCM_of_z_and_e);
 	Serial.println(final_LCM);
-	Serial.println("xy: ");
-	Serial.print(multiply_no_0(x_val, y_val));
-	Serial.println("GCD: ");
-	Serial.print(GCD(x_val, y_val));
+	Serial.print("xy: ");
+	Serial.println(multiply_no_0(x_val, y_val));
+	Serial.print("GCD: ");
+	Serial.println(GCD(x_val, y_val));
 	Serial.println("END");
 #endif
 
