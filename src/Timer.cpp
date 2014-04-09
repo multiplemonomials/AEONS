@@ -15,30 +15,44 @@
 
 #include "Timer.h"
 
-void Timer::initialize(long microseconds)
+TimerBase::TimerBase(avr_port_ptr_large icr, avr_port_ptr_small tccra, avr_port_ptr_small tccrb, avr_port_ptr_large ocra, avr_port_ptr_large ocrb, avr_port_ptr_large ocrc)
+:_icr(icr),
+ _tccra(tccra),
+ _tccrb(tccrb),
+ _ocra(ocra),
+ _ocrb(ocrb),
+ _ocrc(ocrc),
+ _isrCallback(nullptr),
+ _clockSelectBits(),
+_pwmPeriod()
+{
+
+}
+
+void TimerBase::initialize(long microseconds)
 {
   TCCR5A = 0;                 // clear control register A 
   TCCR5B = _BV(WGM53);        // set mode as phase and frequency correct pwm, stop the timer
   setPeriod(microseconds);
 }
 
-void Timer::setPeriod(long microseconds)
+void TimerBase::setPeriod(long microseconds)
 {
   long cycles = (F_CPU * microseconds) / 2000000;                                // the counter runs backwards after TOP, interrupt is at BOTTOM so divide microseconds by 2
-  if(cycles < RESOLUTION)              clockSelectBits = _BV(CS50);              // no prescale, full xtal
-  else if((cycles >>= 3) < RESOLUTION) clockSelectBits = _BV(CS51);              // prescale by /8
-  else if((cycles >>= 3) < RESOLUTION) clockSelectBits = _BV(CS51) | _BV(CS50);  // prescale by /64
-  else if((cycles >>= 2) < RESOLUTION) clockSelectBits = _BV(CS52);              // prescale by /256
-  else if((cycles >>= 2) < RESOLUTION) clockSelectBits = _BV(CS52) | _BV(CS50);  // prescale by /1024
-  else        cycles = RESOLUTION - 1, clockSelectBits = _BV(CS52) | _BV(CS50);  // request was out of bounds, set as maximum
-  *icr = pwmPeriod = cycles;                                                     // ICR1 is TOP in p & f correct pwm mode
-  *tccrb &= ~(_BV(CS50) | _BV(CS51) | _BV(CS52));
-  *tccrb |= clockSelectBits;                                                     // reset clock select register
+  if(cycles < RESOLUTION)              _clockSelectBits = _BV(CS50);              // no prescale, full xtal
+  else if((cycles >>= 3) < RESOLUTION) _clockSelectBits = _BV(CS51);              // prescale by /8
+  else if((cycles >>= 3) < RESOLUTION) _clockSelectBits = _BV(CS51) | _BV(CS50);  // prescale by /64
+  else if((cycles >>= 2) < RESOLUTION) _clockSelectBits = _BV(CS52);              // prescale by /256
+  else if((cycles >>= 2) < RESOLUTION) _clockSelectBits = _BV(CS52) | _BV(CS50);  // prescale by /1024
+  else        cycles = RESOLUTION - 1, _clockSelectBits = _BV(CS52) | _BV(CS50);  // request was out of bounds, set as maximum
+  *_icr = _pwmPeriod = cycles;                                                     // ICR1 is TOP in p & f correct pwm mode
+  *_tccrb &= ~(_BV(CS50) | _BV(CS51) | _BV(CS52));
+  *_tccrb |= _clockSelectBits;                                                     // reset clock select register
 }
 
-void Timer::setPwmDuty(char pin, int duty)
+void TimerBase::setPwmDuty(char pin, int duty)
 {
-  unsigned long dutyCycle = pwmPeriod;
+  unsigned long dutyCycle = _pwmPeriod;
   dutyCycle *= duty;
   dutyCycle >>= 10;
   if(pin == 46) OCR5A = dutyCycle;
@@ -46,7 +60,7 @@ void Timer::setPwmDuty(char pin, int duty)
   if(pin == 45) OCR5C = dutyCycle;
 }
 
-void Timer::pwm(char pin, int duty, long microseconds)  // expects duty cycle to be 10 bit (1024)
+void TimerBase::pwm(char pin, int duty, long microseconds)  // expects duty cycle to be 10 bit (1024)
 {
   if(microseconds > 0) setPeriod(microseconds);
   
@@ -59,38 +73,43 @@ void Timer::pwm(char pin, int duty, long microseconds)  // expects duty cycle to
   start();
 }
 
-void Timer::disablePwm(char pin)
+void TimerBase::disablePwm(char pin)
 {
   if(pin == 46) TCCR5A &= ~_BV(COM5A1);   // clear the bit that enables pwm on PE3
   if(pin == 44) TCCR5A &= ~_BV(COM5B1);   // clear the bit that enables pwm on PE4
   if(pin == 45) TCCR5A &= ~_BV(COM5C1);   // clear the bit that enables pwm on PE5
 }
 
-void Timer::attachInterrupt(void (*isr)(), long microseconds)
+void TimerBase::attachInterrupt(void (*isr)(), long microseconds)
 {
   if(microseconds > 0) setPeriod(microseconds);
-  isrCallback = isr;                                       // register the user's callback with the real ISR
+  _isrCallback = isr;                                       // register the user's callback with the real ISR
   TIMSK5 = _BV(TOIE5);                                     // sets the timer overflow interrupt enable bit
   sei();                                                   // ensures that interrupts are globally enabled
   start();
 }
 
-void Timer::detachInterrupt()
+void TimerBase::detachInterrupt()
 {
   TIMSK5 &= ~_BV(TOIE5);                                   // clears the timer overflow interrupt enable bit 
 }
 
-void Timer::start()
+void TimerBase::start()
 {
-  TCCR5B |= clockSelectBits;
+  TCCR5B |= _clockSelectBits;
 }
 
-void Timer::stop()
+void TimerBase::stop()
 {
   TCCR5B &= ~(_BV(CS50) | _BV(CS51) | _BV(CS52));          // clears all clock selects bits
 }
 
-void Timer::restart()
+void TimerBase::restart()
 {
   TCNT5 = 0;
+}
+
+TimerBase::~TimerBase()
+{
+
 }

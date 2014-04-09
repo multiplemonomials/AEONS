@@ -73,11 +73,15 @@ To Be Implemented
 
 
 /*-----------------------------------------------------------------------------
-	Global variables.
+	Global variable.
 -----------------------------------------------------------------------------*/
 
 //last line number
 long line_number = 0;
+
+//solve link errors.
+//See http://www.avrfreaks.net/index.php?name=PNphpBB2&file=printview&t=59453
+extern "C" void   atexit( void ) { }
 
 /*-----------------------------------------------------------------------------
 -----------------------------------------------------------------------------*/
